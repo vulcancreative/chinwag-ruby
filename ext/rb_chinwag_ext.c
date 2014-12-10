@@ -12,10 +12,10 @@ VALUE c_cw_dict;
 
   // unsigned cw_type = NUM2INT(type);
   // unsigned long amount = NUM2LONG(amt);
-  // get dict as dictionary
+  // TODO : get dict as dictionary
   
-  // do check to make sure type <= 3
-  // do check to make sure amt <= 10000
+  // TODO : do check to make sure type <= 3
+  // TODO : do check to make sure amt <= 10000
   
   // return rb_str_new_cstr(chinwag(cw_type, amount, amount, dictionary))
 // }
@@ -51,8 +51,8 @@ VALUE c_cw_dict_open(VALUE obj, VALUE tkns, VALUE name)
   {
     d = open_dict_with_name_and_tokens("latin", dict_latin, DELIMITERS);
   }
-  // ...else, see if file exists by passed name...
-  // ...else, throw a fit (error)
+  // TODO : ...else, see if file exists by passed name...
+  // TODO : ...else, throw a fit (error)
 
   // create a dictionary pointer
   dict_t* d_ptr = (dict_t*)malloc(sizeof(dict_t));

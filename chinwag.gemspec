@@ -1,15 +1,15 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'chinwag/info'
+require 'chinwag/version'
 
 Gem::Specification.new do |s|
   s.name          = "chinwag"
   s.version       = Chinwag::VERSION
   s.authors       = ["Chris Calo"]
   s.email         = ["ccalo@vulcanca.com"]
-  s.summary       = %q{TODO: Write a short summary. Required.}
-  s.description   = %q{TODO: Write a longer description. Optional.}
+  s.summary       = %q{Chinwag - whatever}
+  s.description   = %q{See above... this is just a quick test}
   s.homepage      = "https://github.com/vulcancreative/chinwag"
   s.license       = "MIT"
 
