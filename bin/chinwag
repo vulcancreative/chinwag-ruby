@@ -1,0 +1,6 @@
+#! /usr/bin/env ruby
+
+require 'chinwag'
+
+p "running hello()..."
+hello

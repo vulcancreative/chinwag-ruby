@@ -161,6 +161,7 @@ dict_t open_dict()
   d.sorted = false;
   d.count = 0;
   d.drows = NULL;
+  d.name = NULL;
 
   return d;
 }
@@ -173,6 +174,7 @@ dict_t open_dict_with_name(const char* name)
   d.sorted = false;
   d.count = 0;
   d.drows = NULL;
+  d.name = NULL;
 
   d.name = (char*)malloc((strlen(name) + 1) * sizeof(char));
   strcpy(d.name, name);
@@ -183,6 +185,7 @@ dict_t open_dict_with_name(const char* name)
 dict_t open_dict_with_tokens(const char* const buffer, const char* delimiters)
 {
   dict_t d = tokenize(buffer, delimiters);
+  d.name = NULL;
 
   return d;
 }
@@ -190,6 +193,7 @@ dict_t open_dict_with_tokens(const char* const buffer, const char* delimiters)
 dict_t open_dict_with_name_and_tokens(const char* name, const char* const buffer, const char* delimiters)
 {
   dict_t d = tokenize(buffer, delimiters);
+  d.name = NULL;
 
   d.name = (char*)malloc((strlen(name) + 1) * sizeof(char));
   strcpy(d.name, name);
@@ -370,6 +374,33 @@ dict_t map_dict(dict_t dict, char* (*f)(char*))
   return dict;
 }
 
+dict_t deep_copy_dict(dict_t dict)
+{
+  dict_t new;
+
+  if(dict.name) new = open_dict_with_name(dict.name);
+  else new = open_dict();
+
+  for(U32 i = 0; i != dict.count; ++i)
+  {
+    for(U32 j = 0; j != dict.drows[i].count; ++j)
+    {
+      new = place_word_in_dict_strict(new, dict.drows[i].words[j]);
+    }
+  }
+
+  if(dict.name)
+  {
+    new.name = (char*)malloc(strlen(dict.name) + 1);
+    strcpy(new.name, dict.name);
+    new.name[strlen(dict.name)] = '\0';
+  }
+
+  if(dict.sorted) new = bubble_dict(new);
+
+  return new;
+}
+
 bool dict_exclude(dict_t dict, char const* str)
 {
   for(U32 i = 0; i != dict.count; ++i)
@@ -394,6 +425,38 @@ bool dict_include(dict_t dict, char const* str)
   }
 
   return false;
+}
+
+bool dict_valid(dict_t dict, char** error)
+{
+  U32 count = 0;
+
+  for(U32 i = 0; i != dict.count; ++i)
+  {
+    for(U32 j = 0; j != dict.drows[i].count; ++j)
+    {
+      // valid if word excludes a space
+      if(exclude(dict.drows[i].words[j], " ")) ++count;
+    }
+  }
+  
+  if(count < MIN_DICT_SIZE)
+  {
+    *error = (char*)malloc(SMALL_BUFFER);
+    sprintf(*error, "dictionary too small (%d of %d)",count,MIN_DICT_SIZE);
+
+    return false;
+  }
+    
+  if(dict.sorted == false)
+  {
+    *error = (char*)malloc(SMALL_BUFFER);
+    sprintf(*error, "dictionary couldn't be sorted");
+
+    return false;
+  }
+
+  return true;
 }
 
 I32 find_drow_of_size_in_dict(dict_t dict, U32 largest)
@@ -498,10 +561,15 @@ void puts_dict(dict_t dict)
   fprintf(stdout, "]");
 }
 
-void close_dict(dict_t dict)
+dict_t close_dict(dict_t dict)
 {
   for(U32 i = 0; i != dict.count; ++i) close_drow(dict.drows[i]);
-  if(dict.drows) free(dict.drows);
+  if(dict.drows) { free(dict.drows); dict.drows = NULL; }
+
+  dict.count = 0;
+  if(dict.name) { free(dict.name); dict.name = NULL; }
+
+  return open_dict();
 }
 
 void validate_dict(dict_t dict, char const* function_name)

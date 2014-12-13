@@ -10,8 +10,3 @@ extern VALUE m_chinwag;
 extern VALUE c_cw_dict;
 
 #endif
-
-/*
-void rb_define_module_function(VALUE module, const char *name, 
-VALUE (*func)(), int argc)
-*/

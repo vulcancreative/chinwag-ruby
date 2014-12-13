@@ -26,20 +26,21 @@ dict_t add_drow_to_dict_strict(dict_t dict, drow_t drow, U32 size);
 dict_t place_word_in_dict(dict_t dict, const char* word);
 dict_t place_words_in_dict(dict_t dict, const char* const* words, U32 s);
 dict_t place_word_in_dict_strict(dict_t dict, const char* word);
-dict_t place_words_in_dict_strict(dict_t dict, const char* const* words, 
-U32 s);
+dict_t place_words_in_dict_strict(dict_t dict, const char* const* words, U32 s);
 dict_t bubble_dict(dict_t dict);
 dict_t prune_dict(dict_t dict, bool sorted);
 dict_t map_dict(dict_t dict, char* (*f)(char*));
+dict_t deep_copy_dict(dict_t dict);
 bool dict_exclude(dict_t dict, char const* str);
 bool dict_include(dict_t dict, char const* str);
+bool dict_valid(dict_t dict, char** error);
 I32 find_drow_of_size_in_dict(dict_t dict, U32 largest);
 U32 total_dict(dict_t dict);
 U32 dict_largest(dict_t dict);
 char* sample_dict(dict_t dict);
 char* join_dict(dict_t dict, char const* delimiter);
 void puts_dict(dict_t dict);
-void close_dict(dict_t dict);
+dict_t close_dict(dict_t dict);
 
 // secondary utilities
 void validate_dict(dict_t dict, char const* function_name);
