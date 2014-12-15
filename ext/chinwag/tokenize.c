@@ -49,8 +49,5 @@ dict_t tokenize(const char* const buffer, const char* delimiters)
   // clean up dict
   dict = prune_dict(dict, true);
 
-  // validate dict
-  validate_dict(dict, "tokenize");
-
   return dict;
 }

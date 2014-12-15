@@ -344,6 +344,8 @@ dict_t prune_dict(dict_t dict, bool sorted)
     }
   }
 
+  if(dict_any_blanks(dict)) dict = prune_dict(dict, sorted);
+
   return dict;
 }
 
@@ -427,6 +429,19 @@ bool dict_include(dict_t dict, char const* str)
   return false;
 }
 
+bool dict_any_blanks(dict_t dict)
+{
+  for(U32 i = 0; i != dict.count; ++i)
+  {
+    for(U32 j = 0; j != dict.drows[i].count; ++j)
+    {
+      if(drow_word_blank(dict.drows[i], j)) return true;
+    }
+  }
+
+  return false;
+}
+
 bool dict_valid(dict_t dict, char** error)
 {
   U32 count = 0;
@@ -443,7 +458,8 @@ bool dict_valid(dict_t dict, char** error)
   if(count < MIN_DICT_SIZE)
   {
     *error = (char*)malloc(SMALL_BUFFER);
-    sprintf(*error, "dictionary too small (%d of %d)",count,MIN_DICT_SIZE);
+    sprintf(*error, "too few acceptable entries (%d of %d)",count,
+    MIN_DICT_SIZE);
 
     return false;
   }
@@ -602,6 +618,33 @@ void validate_dict(dict_t dict, char const* function_name)
     fprintf(stderr, e, function_name);
     exit(EXIT_FAILURE);
   }
+}
+
+dict_t split(const char* buffer, const char* delimiters)
+{
+  char* tok;
+  char* mutable_buffer = (char*)malloc(strlen(buffer) + 1 * sizeof(char));
+  dict_t dict = open_dict();
+
+  // get mutable copy of buffer; a bit slower, but allows for const-ness
+  strcpy(mutable_buffer, buffer);
+  mutable_buffer[strlen(buffer)] = '\0';
+
+  // natively tokenize input string
+  tok = strtok(mutable_buffer, delimiters);
+  while(tok != NULL)
+  {
+    // add word to dict
+    dict = place_word_in_dict(dict, tok);
+
+    // get new tok (if any)
+    tok = strtok(NULL, delimiters);
+  }
+
+  // close mutable buffer
+  free(mutable_buffer);
+
+  return dict;
 }
 
 #ifdef DICTMAIN

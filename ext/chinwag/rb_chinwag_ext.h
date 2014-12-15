@@ -2,6 +2,7 @@
 #define __RB_CHINWAG_EXT_NNA6BCFM_H
 
 #include <ruby.h>
+#include <ruby/io.h>
 #include <ruby/intern.h>
 
 #include "chinwag.h"

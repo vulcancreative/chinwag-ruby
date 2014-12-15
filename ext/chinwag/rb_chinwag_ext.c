@@ -6,12 +6,32 @@ VALUE c_cw_dict;
 VALUE default_dict;
 VALUE default_output_type;
 
-// VALUE m_cw_generate(VALUE obj, VALUE type, VALUE amt, VALUE dict)
+cw_t get_cw_t_for_symbol(VALUE symbol)
+{
+  cw_t cw_type = CW_DEFAULT;
+
+  Check_Type(symbol, T_SYMBOL);
+
+  VALUE id = rb_to_id(symbol);
+
+  if(strcmp(rb_id2name(id), "letters") == 0) cw_type = CW_LETTERS;
+  else if(strcmp(rb_id2name(id), "words") == 0) cw_type = CW_WORDS;
+  else if(strcmp(rb_id2name(id), "sentences") == 0)cw_type=CW_SENTENCES;
+  else if(strcmp(rb_id2name(id), "paragraphs") == 0)cw_type=CW_PARAGRAPHS;
+  else
+  {
+    rb_raise(rb_eTypeError, "invalid type (expected :letters, :words, "
+    ":sentences, or :paragraphs)");
+  }
+
+  return cw_type;
+}
+
 VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
 {
   dict_t* d;
   VALUE result;
-  cw_t cw_type = FIX2INT(default_output_type);
+  cw_t cw_type = get_cw_t_for_symbol(default_output_type);
   long min = DEFAULT_MIN_OUTPUT_LENGTH, max = DEFAULT_MAX_OUTPUT_LENGTH;
   char* output, *e;
 
@@ -26,19 +46,7 @@ VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
 
   if(argc >= 1) Data_Get_Struct(argv[0], dict_t, d);
   
-  if(argc >= 2)
-  {
-    Check_Type(argv[1], T_FIXNUM);
-    long temp_t = FIX2LONG(argv[1]);
-
-    if(temp_t != CW_LETTERS && temp_t != CW_WORDS &&
-    temp_t != CW_SENTENCES && temp_t != CW_PARAGRAPHS)
-    {
-      rb_raise(rb_eArgError, "invalid type (expected LETTERS, WORDS, "
-      "SENTENCES, or PARAGRAPHS)");
-    }
-    else cw_type = temp_t;
-  }
+  if(argc >= 2) cw_type = get_cw_t_for_symbol(argv[1]);
 
   if(argc >= 3)
   {
@@ -85,7 +93,7 @@ VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
       output = chinwag(cw_type, min, max, *d);
       break;
     default:
-      rb_raise(rb_eArgError, "invalid type (expected LETTERS, WORDS, "
+      rb_raise(rb_eTypeError, "invalid type (expected LETTERS, WORDS, "
       "SENTENCES, or PARAGRAPHS)");
       break;
   }
@@ -108,34 +116,24 @@ VALUE m_set_d_dict(VALUE obj, VALUE new)
   return original;
 }
 
-VALUE m_set_d_type(VALUE obj, VALUE type)
+VALUE m_set_d_type(VALUE obj, VALUE sym)
 {
   VALUE original = default_output_type;
-  long temp_t = FIX2LONG(default_output_type);
 
-  Check_Type(type, T_FIXNUM);
-  cw_t cw_type = FIX2LONG(type);
+  Check_Type(sym, T_SYMBOL);
 
-  switch(cw_type)
+  VALUE id = rb_to_id(sym);
+
+  if(strcmp(rb_id2name(id), "letters") == 0) default_output_type = sym;
+  else if(strcmp(rb_id2name(id), "words") == 0) default_output_type = sym;
+  else if(strcmp(rb_id2name(id), "sentences") == 0)default_output_type=sym;
+  else if(strcmp(rb_id2name(id), "paragraphs") == 0)default_output_type=sym;
+  else
   {
-    case CW_LETTERS:
-      default_output_type = INT2NUM(cw_type);
-      break;
-    case CW_WORDS:
-      default_output_type = INT2NUM(cw_type);
-      break;
-    case CW_SENTENCES:
-      default_output_type = INT2NUM(cw_type);
-      break;
-    case CW_PARAGRAPHS:
-      default_output_type = INT2NUM(cw_type);
-      break;
-    default:
-      rb_raise(rb_eArgError, "invalid type (expected LETTERS, WORDS, "
-      "SENTENCES, or PARAGRAPHS)");
-      break;
+    rb_raise(rb_eTypeError, "invalid type (expected :letters, :words, "
+    ":sentences, or :paragraphs)");
   }
-  
+
   return original;
 }
 
@@ -147,7 +145,13 @@ static void c_cw_dict_free(void* dict)
 
 VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
 {
-  dict_t d = open_dict(); char* tkns_ptr = NULL; char* name_ptr = NULL;
+  VALUE file_pathname;
+  FILE* file_ptr = NULL;
+  dict_t d = open_dict(), path_parts, file_parts;
+  char* tkns_ptr = NULL; char* name_ptr = NULL;
+  char* path_name = NULL; char* file_name = NULL;
+  char* name = NULL; bool used_file = false; char* file_buffer = NULL;
+  long last_drow = 0, last_word = 0; size_t len = 0;
 
   // raise exception if passed wrong number of arguments
   if(argc > 2) 
@@ -155,8 +159,63 @@ VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
 
   if(argc == 1)
   {
-    Check_Type(argv[0], T_STRING);
-    tkns_ptr = StringValueCStr(argv[0]);
+    switch(TYPE(argv[0]))
+    {
+      case T_FILE:
+        file_pathname = RFILE(argv[0])->fptr->pathv;
+        path_name = StringValueCStr(file_pathname);
+        file_ptr = rb_io_stdio_file(RFILE(argv[0])->fptr);
+
+        if(include(path_name, "/") || include(path_name, "\\"))
+        {
+          path_parts = split(path_name, "/\\");
+
+          last_drow = path_parts.count - 1;
+          last_word = path_parts.drows[last_drow].count - 1;
+          len = strlen(path_parts.drows[last_drow].words[last_word]);
+
+          file_name = (char*)malloc(len + 1);
+          strcpy(file_name, path_parts.drows[last_drow].words[last_word]);
+          file_name[len] = '\0';
+
+          close_dict(path_parts);
+        }
+        else
+        {
+          file_name = (char*)malloc(strlen(path_name) + 1);
+          strcpy(file_name, path_name);
+          file_name[strlen(path_name)] = '\0';
+        }
+
+        if(include(file_name, "."))
+        {
+          file_parts = split(file_name, ".");
+
+          size_t len = strlen(file_parts.drows[0].words[0]);
+
+          name = (char*)malloc(len + 1);
+          strcpy(name, file_parts.drows[0].words[0]);
+          name[len] = '\0';
+
+          close_dict(file_parts);
+        }
+        else
+        {
+          name = (char*)malloc(strlen(file_name) + 1);
+          strcpy(name, file_name);
+          name[strlen(file_name)] = '\0';
+        }
+
+        used_file = true;
+
+        break;
+      case T_STRING:
+        tkns_ptr = StringValueCStr(argv[0]);
+        break;
+      default:
+        rb_raise(rb_eTypeError, "invalid type (String or File)");
+        break;
+    }
   }
   if(argc == 2)
   {
@@ -165,31 +224,48 @@ VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
   }
 
   // check if tkns references existing, embedded dictionary...
-  if(!tkns_ptr && !name_ptr) d = open_dict();
-  else if(tkns_ptr)
+  if(!tkns_ptr && !name_ptr && !used_file) d = open_dict();
+  else if(tkns_ptr && !used_file)
   {
     if(strcmp(tkns_ptr, "seussian") == 0)
     {
       if(!name_ptr)
-      d = open_dict_with_name_and_tokens("seussian", dict_seuss,DELIMITERS);
+      d = open_dict_with_name_and_tokens("seussian",dict_seuss,DELIMITERS);
       else
-      d = open_dict_with_name_and_tokens(name_ptr, dict_seuss,DELIMITERS);
+      d = open_dict_with_name_and_tokens(name_ptr,dict_seuss,DELIMITERS);
     }
     else if(strcmp(tkns_ptr, "latin") == 0)
     {
       if(!name_ptr)
-      d = open_dict_with_name_and_tokens("latin", dict_latin, DELIMITERS);
+      d = open_dict_with_name_and_tokens("latin", dict_latin,DELIMITERS);
       else
-      d = open_dict_with_name_and_tokens(name_ptr, dict_latin, DELIMITERS);
+      d = open_dict_with_name_and_tokens(name_ptr, dict_latin,DELIMITERS);
     }
   }
-  else if(name_ptr) d = open_dict_with_name(name_ptr);
-  // TODO : ...else, see if file exists by passed name...
-  // TODO : ...else, throw a fit (error)
+  // ...else, if just a name was passed...
+  else if(name_ptr && !used_file) d = open_dict_with_name(name_ptr);
+  // ...else, see if file exists by passed name...
+  else if(used_file && name && file_ptr)
+  {
+    U32 stringify_result = stringify_file(&file_buffer, file_ptr);
+    if(stringify_result == 0)
+    {
+      rb_raise(rb_eException, "unable to process passed file (%s)", 
+      file_name);
+    }
+
+    d = open_dict_with_name_and_tokens(name, file_buffer, DELIMITERS);
+
+    free(file_buffer);
+  }
+  // ...else, return a blank dictionary
 
   // create a dictionary pointer
   dict_t* d_ptr = (dict_t*)malloc(sizeof(dict_t));
-  d_ptr = (dict_t*)memmove(d_ptr, &d, sizeof(dict_t));
+  *d_ptr = d;
+
+  if(name) free(name);
+  if(file_name) free(file_name);
 
   return Data_Wrap_Struct(c_cw_dict, 0, c_cw_dict_free, d_ptr);
 }
@@ -258,18 +334,6 @@ VALUE c_cw_dict_join(int argc, VALUE* argv, VALUE obj)
   return rb_str_new2(join_dict(*d, StringValueCStr(argv[0])));
 }
 
-VALUE c_cw_dict_sort(VALUE obj)
-{
-  dict_t* d;
-
-  // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
-
-  *d = bubble_dict(*d);
-
-  return obj;
-}
-
 VALUE c_cw_dict_clone(VALUE obj)
 {
   dict_t* d, *new_p;
@@ -289,7 +353,77 @@ VALUE c_cw_dict_clone(VALUE obj)
   return new;
 }
 
+VALUE c_cw_dict_sample(VALUE obj)
+{
+  dict_t* d;
+
+  // get original pointer from Ruby VM
+  Data_Get_Struct(obj, dict_t, d);
+
+  return rb_str_new2(sample_dict(*d));
+}
+
+VALUE c_cw_dict_sort(VALUE obj)
+{
+  dict_t* d;
+  VALUE new;
+
+  // get a new copy of the original dict
+  new = c_cw_dict_clone(obj);
+
+  // get original pointer from Ruby VM
+  Data_Get_Struct(new, dict_t, d);
+
+  *d = bubble_dict(*d);
+
+  return new;
+}
+
 VALUE c_cw_dict_prune(VALUE obj)
+{
+  dict_t* d;
+  VALUE new;
+
+  // get a new copy of the original dict
+  new = c_cw_dict_clone(obj);
+
+  // get original pointer from Ruby VM
+  Data_Get_Struct(new, dict_t, d);
+
+  *d = prune_dict(*d, false);
+
+  return new;
+}
+
+VALUE c_cw_dict_clean(VALUE obj)
+{
+  dict_t* d;
+  VALUE new;
+
+  // get a new copy of the original dict
+  new = c_cw_dict_clone(obj);
+
+  // get original pointer from Ruby VM
+  Data_Get_Struct(new, dict_t, d);
+
+  *d = prune_dict(*d, true);
+
+  return new;
+}
+
+VALUE c_cw_dict_sort_s(VALUE obj)
+{
+  dict_t* d;
+
+  // get original pointer from Ruby VM
+  Data_Get_Struct(obj, dict_t, d);
+
+  *d = bubble_dict(*d);
+
+  return obj;
+}
+
+VALUE c_cw_dict_prune_s(VALUE obj)
 {
   dict_t* d;
 
@@ -301,7 +435,7 @@ VALUE c_cw_dict_prune(VALUE obj)
   return obj;
 }
 
-VALUE c_cw_dict_clean(VALUE obj)
+VALUE c_cw_dict_clean_s(VALUE obj)
 {
   dict_t* d;
 
@@ -313,14 +447,22 @@ VALUE c_cw_dict_clean(VALUE obj)
   return obj;
 }
 
-VALUE c_cw_dict_sample(VALUE obj)
+VALUE c_cw_dict_validate_s(VALUE obj)
 {
+  char* e;
   dict_t* d;
 
   // get original pointer from Ruby VM
   Data_Get_Struct(obj, dict_t, d);
 
-  return rb_str_new2(sample_dict(*d));
+  // handle invalid state first (for error handling's sake)
+  if(!dict_valid(*d, &e))
+  {
+    rb_raise(rb_eException, "%s", e);
+    free(e);
+  }
+
+  return obj;
 }
 
 VALUE c_cw_dict_named_q(VALUE obj)
@@ -415,7 +557,7 @@ VALUE c_cw_dict_inspect(VALUE obj)
       count += word_len;
 
       // add continuation delimiter (if applicable)
-      if(j < dict->drows[i].count - 1) { strcat(result,", "); count += 2; }
+      if(j < dict->drows[i].count - 1){ strcat(result,", "); count += 2; }
 
       // resize result if necessary
       if(count >= LARGE_BUFFER * multiplier - 100)
@@ -428,7 +570,7 @@ VALUE c_cw_dict_inspect(VALUE obj)
         temp[count] = '\0';
 
         // increase buffer size
-        result = (char*)realloc(result, LARGE_BUFFER * ++multiplier + 1);
+        result = (char*)realloc(result,LARGE_BUFFER * ++multiplier + 1);
 
         // move back into resulting string and clear intermediary buffer
         strcpy(result, temp);
@@ -528,12 +670,6 @@ void Init_chinwag()
   m_chinwag = rb_define_module("Chinwag");
   c_cw_dict = rb_define_class_under(m_chinwag, "CWDict", rb_cObject);
 
-  // define constants
-  rb_define_const(m_chinwag, "LETTERS", INT2NUM(0));
-  rb_define_const(m_chinwag, "WORDS", INT2NUM(1));
-  rb_define_const(m_chinwag, "SENTENCES", INT2NUM(2));
-  rb_define_const(m_chinwag, "PARAGRAPHS", INT2NUM(3));
-
   // sync up module generation functions
   rb_define_module_function(m_chinwag, "generate", m_cw_generate, -1);
   rb_define_module_function(m_chinwag, "set_default_dict", m_set_d_dict, 1);
@@ -542,20 +678,30 @@ void Init_chinwag()
   // sync up class methods
   rb_define_singleton_method(c_cw_dict, "open", c_cw_dict_open, -1);
   rb_define_method(c_cw_dict, "close", c_cw_dict_close, 0);
+
   rb_define_method(c_cw_dict, "name", c_cw_dict_name_g, 0);
   rb_define_method(c_cw_dict, "name=", c_cw_dict_name_s, 1);
   rb_define_method(c_cw_dict, "length", c_cw_dict_length, 0);
+
   rb_define_method(c_cw_dict, "join", c_cw_dict_join, -1);
-  rb_define_method(c_cw_dict, "sort", c_cw_dict_sort, 0);
   rb_define_method(c_cw_dict, "clone", c_cw_dict_clone, 0);
+  rb_define_method(c_cw_dict, "sample", c_cw_dict_sample, 0);
+
+  rb_define_method(c_cw_dict, "sort", c_cw_dict_sort, 0);
   rb_define_method(c_cw_dict, "prune", c_cw_dict_prune, 0);
   rb_define_method(c_cw_dict, "clean", c_cw_dict_clean, 0);
-  rb_define_method(c_cw_dict, "sample", c_cw_dict_sample, 0);
+
+  rb_define_method(c_cw_dict, "sort!", c_cw_dict_sort_s, 0);
+  rb_define_method(c_cw_dict, "prune!", c_cw_dict_prune_s, 0);
+  rb_define_method(c_cw_dict, "clean!", c_cw_dict_clean_s, 0);
+  rb_define_method(c_cw_dict, "validate!", c_cw_dict_validate_s, 0);
+
   rb_define_method(c_cw_dict, "named?", c_cw_dict_named_q, 0);
   rb_define_method(c_cw_dict, "valid?", c_cw_dict_valid_q, 0);
   rb_define_method(c_cw_dict, "sorted?", c_cw_dict_sorted_q, 0);
   rb_define_method(c_cw_dict, "include?", c_cw_dict_include_q, 1);
   rb_define_method(c_cw_dict, "exclude?", c_cw_dict_exclude_q, 1);
+
   rb_define_method(c_cw_dict, "inspect", c_cw_dict_inspect, 0);
   rb_define_method(c_cw_dict, "to_s", c_cw_dict_to_s, 0);
 
@@ -563,6 +709,8 @@ void Init_chinwag()
   rb_define_method(c_cw_dict, "+", c_cw_dict_add_op, 1);
   rb_define_method(c_cw_dict, "+=", c_cw_dict_add_assign_op, 1);
   rb_define_method(c_cw_dict, "<<", c_cw_dict_append_op, 1);
+  // rb_define_method(c_cw_dict, "==", c_cw_dict_check_equality, 1);
+  // rb_define_method(c_cw_dict, "!=", c_cw_dict_check_inequality, 1);
 
   // method aliases
   rb_define_alias(c_cw_dict, "dup", "clone");
@@ -574,5 +722,5 @@ void Init_chinwag()
   default_dict = c_cw_dict_open(1, args, default_dict);
 
   // set default output type
-  default_output_type = INT2NUM(CW_DEFAULT);
+  default_output_type = ID2SYM(rb_intern("words"));
 }

@@ -33,6 +33,7 @@ dict_t map_dict(dict_t dict, char* (*f)(char*));
 dict_t deep_copy_dict(dict_t dict);
 bool dict_exclude(dict_t dict, char const* str);
 bool dict_include(dict_t dict, char const* str);
+bool dict_any_blanks(dict_t dict);
 bool dict_valid(dict_t dict, char** error);
 I32 find_drow_of_size_in_dict(dict_t dict, U32 largest);
 U32 total_dict(dict_t dict);
@@ -44,5 +45,6 @@ dict_t close_dict(dict_t dict);
 
 // secondary utilities
 void validate_dict(dict_t dict, char const* function_name);
+dict_t split(const char* buffer, const char* delimiters);
 
 #endif
