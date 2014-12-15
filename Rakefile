@@ -8,7 +8,7 @@ Rake::ExtensionTask.new "chinwag" do |ext|
   ext.lib_dir = "lib/chinwag"
 end
 
-s = Gem::Specification.new "chinwag", "0.1.0" do |s|
+s = Gem::Specification.new "chinwag", "0.1.1" do |s|
   s.authors = ["Chris Calo"]
   s.email = ["ccalo@vulcanca.com"]
   s.summary = "A text-synthesis library, for use in layout testing (and more)."
