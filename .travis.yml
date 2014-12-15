@@ -6,9 +6,6 @@ rvm:
   - 2.1.3
   - ruby-head
   - ree
-os:
-  - linux
-  - osx
 before_install:
   - gem update --system
   - gem --version
