@@ -81,7 +81,7 @@ CWDict instances can also be loaded from the provided token dictionaries, Seussi
   seuss = Chinwag::CWDict.open "seussian"
   latin = Chinwag::CWDict.open "latin"
 
-A third option is to dynamically create a CWDict via collection-like concatentation or String instances or String Arrays:
+A third option is to dynamically create a CWDict via collection-like concatentation with String instances or String Arrays:
 
   # ...
   
