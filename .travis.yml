@@ -6,3 +6,4 @@ rvm:
   - 2.1.3
   - ruby-head
   - ree
+before_install: rake clean clobber compile
