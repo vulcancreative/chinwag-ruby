@@ -10,6 +10,12 @@
 #include <rubyio.h>
 #endif
 
+#ifdef HAVE_RUBY_INTERN_H
+#include <ruby/intern.h>
+#else
+#include <intern.h>
+#endif
+
 #include "chinwag.h"
 
 extern VALUE m_chinwag;
