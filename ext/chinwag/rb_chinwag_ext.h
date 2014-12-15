@@ -5,6 +5,12 @@
 #include <ruby/io.h>
 #include <ruby/intern.h>
 
+#ifdef HAVE_RUBY_IO_H
+#include <ruby/io.h>
+#else
+#include <ruby/rubyio.h>
+#endif
+
 #include "chinwag.h"
 
 extern VALUE m_chinwag;

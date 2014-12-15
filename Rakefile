@@ -29,9 +29,7 @@ end
 
 Gem::PackageTask.new s do end
 
-task :spec => [:clean, :clobber, :compile] do
-  puts "compiling..."
-end
+task :spec => [:clean, :clobber, :compile]
 
 task :default => :spec
 task :test => :spec
