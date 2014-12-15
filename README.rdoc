@@ -1,3 +1,5 @@
+{<img src="https://travis-ci.org/vulcancreative/chinwag-ruby.svg" alt="Build Status" />}[https://travis-ci.org/vulcancreative/chinwag-ruby]
+
 = Chinwag Ruby
 
 Much like its command-line counterpart, Chinwag Ruby exists as a text-synthesis tool, used for mocking up various textual elements. It the ideal companion to a Rails or Sinatra web application, where one needs to easily prototype space, while awaiting final copy. In this particular (Ruby) flavor of Chinwag, the forward-facing API is in Ruby, with the the underpinnings working seamlessly as a Ruby C extension.
