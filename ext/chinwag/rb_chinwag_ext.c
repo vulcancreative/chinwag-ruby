@@ -722,6 +722,30 @@ VALUE c_cw_dict_add_assign_op(VALUE obj, VALUE addend)
   return c_cw_dict_append_op(obj, addend);
 }
 
+VALUE c_cw_dict_check_equality(VALUE obj, VALUE against)
+{
+  dict_t* d, *comparison;
+
+  // get original pointers from Ruby VM
+  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(against, dict_t, comparison);
+
+  if(dict_equal(*d, *comparison)) return Qtrue;
+  return Qfalse;
+}
+
+VALUE c_cw_dict_check_inequality(VALUE obj, VALUE against)
+{
+  dict_t* d, *comparison;
+
+  // get original pointers from Ruby VM
+  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(against, dict_t, comparison);
+
+  if(dict_not_equal(*d, *comparison)) return Qtrue;
+  return Qfalse;
+}
+
 void Init_chinwag()
 {
   // setup module extension and containing class(es)
@@ -769,8 +793,8 @@ void Init_chinwag()
   rb_define_method(c_cw_dict, "+", c_cw_dict_add_op, 1);
   rb_define_method(c_cw_dict, "+=", c_cw_dict_add_assign_op, 1);
   rb_define_method(c_cw_dict, "<<", c_cw_dict_append_op, 1);
-  // rb_define_method(c_cw_dict, "==", c_cw_dict_check_equality, 1);
-  // rb_define_method(c_cw_dict, "!=", c_cw_dict_check_inequality, 1);
+  rb_define_method(c_cw_dict, "==", c_cw_dict_check_equality, 1);
+  rb_define_method(c_cw_dict, "!=", c_cw_dict_check_inequality, 1);
 
   // method aliases
   rb_define_alias(c_cw_dict, "dup", "clone");

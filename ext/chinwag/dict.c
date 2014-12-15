@@ -475,6 +475,42 @@ bool dict_valid(dict_t dict, char** error)
   return true;
 }
 
+bool dict_equal(dict_t dict, dict_t against)
+{
+  if(dict.count != against.count) return false;
+
+  for(U32 i = 0; i != dict.count; ++i)
+  {
+    if(dict.drows[i].count != against.drows[i].count) return false;
+
+    for(U32 j = 0; j != dict.drows[i].count; ++j)
+    {
+      if(strcmp(dict.drows[i].words[j], against.drows[i].words[j]) != 0)
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool dict_not_equal(dict_t dict, dict_t against)
+{
+  if(dict.count != against.count) return true;
+
+  for(U32 i = 0; i != dict.count; ++i)
+  {
+    if(dict.drows[i].count != against.drows[i].count) return true;
+
+    for(U32 j = 0; j != dict.drows[i].count; ++j)
+    {
+      if(strcmp(dict.drows[i].words[j], against.drows[i].words[j]) != 0)
+      return true;
+    }
+  }
+
+  return false;
+}
+
 I32 find_drow_of_size_in_dict(dict_t dict, U32 largest)
 {
   // sort dict if necessary

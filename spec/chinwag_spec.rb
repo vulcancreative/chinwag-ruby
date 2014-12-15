@@ -250,4 +250,22 @@ describe Chinwag::CWDict do
     expect(@small_mess.include? "appending").to be false
     expect(@small_mess.include? "strings").to be false
   end
+
+  it "should allow for the testing of equality/inequality" do
+    @empty = Chinwag::CWDict.open
+    expect(@empty).not_to eq(@seuss_dict)
+
+    @slight = @empty.clone; @slight << %w[some test entries]
+    expect(@slight).not_to eq(@empty)
+    expect(@slight).not_to eq(@seuss_dict)
+
+    @empty = @seuss_dict.clone; @empty.close
+    expect(@empty).not_to eq(@seuss_dict)
+
+    @shallow = @seuss_dict
+    expect(@shallow).to eq(@seuss_dict)
+
+    @shallow = @seuss_dict.clone
+    expect(@shallow).to eq(@seuss_dict)
+  end
 end

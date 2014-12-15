@@ -104,7 +104,7 @@ A third option is to dynamically create a CWDict via collection-like concatentat
   blank.validate!
   # => shouldn't throw an Exception
 
-With a valid CWDict, one can easily generate text, using the like-named method - generate. The generate method takes a couple optional arguments, with one of four output types, in the form of a Symbol - :letters, :words, :sentences, or :paragraphs. The generator outputs 1 to 5 words using the Seussian dictionary byt default:
+With a valid CWDict, one can easily generate text, using the like-named method - generate. The generate method takes a couple optional arguments, with one of four output types, in the form of a Symbol - :letters, :words, :sentences, or :paragraphs. The generator outputs 1 to 5 words using the Seussian dictionary by default:
 
   # ...
 
@@ -155,7 +155,7 @@ The alternative to using the supplied arguments is to set the defaults yourself,
 
 == Caveats
 
-As with most things, if it sounds too good to be true, it probably is. While Chinwag and Chinwag Ruby are heavily tested in multiple platforms, it is a C-based application, which could prove a bit odd in unknown environments. That said, it is built to be quite solid and resilient, using age-old standards, and hiccups should be far and few between (if at all).
+While Chinwag and Chinwag Ruby are heavily tested in multiple platforms, it is a C-based application, which could prove a bit odd in unknown environments. That said, it is built to be quite solid and resilient, using age-old standards, and hiccups should be far and few between (if at all).
 
 The only other thing worth mentioning is the output cap. Chinwag is hard-wired to only be able to output up to 10,000 increments of the desired output type at a time. While this cannot be changed without modifying the source directly, it really is for the greater good - 10,000 :letters or :words takes only a mere fraction of a second, but 10,000 sentences can take ~3-5 seconds and 10,000 :paragraphs can take up to ~10 seconds on slower machines. That said, it's usually much faster to simply run the generate method a few times over, if a vast amount of placeholder text is needed, and concatenate the resulting String instances. (Bear in mind, the average novella has roughly 17,000 to 40,000 words, with novels having slightly more.)
 

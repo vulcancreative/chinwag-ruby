@@ -35,6 +35,8 @@ bool dict_exclude(dict_t dict, char const* str);
 bool dict_include(dict_t dict, char const* str);
 bool dict_any_blanks(dict_t dict);
 bool dict_valid(dict_t dict, char** error);
+bool dict_equal(dict_t dict, dict_t against);
+bool dict_not_equal(dict_t dict, dict_t against);
 I32 find_drow_of_size_in_dict(dict_t dict, U32 largest);
 U32 total_dict(dict_t dict);
 U32 dict_largest(dict_t dict);
