@@ -5,28 +5,28 @@ describe Chinwag do
   before(:all) { @latin_dict = Chinwag::CWDict.open "latin" }
 
   it "generates letters" do
-    amount = rand(1500..2500)
+    amount = rand(1000) + 1500
     result = Chinwag::generate(@latin_dict, :letters, amount, amount)
 
     expect(result.length).to eq(amount)
   end
 
   it "generates words" do
-    amount = rand(1500..2500)
+    amount = rand(1000) + 1500
     result = Chinwag::generate(@latin_dict, :words, amount, amount)
 
     expect(result.split(" ").length).to eq(amount)
   end
 
   it "generates sentences" do
-    amount = rand(1500..2500)
+    amount = rand(1000) + 1500
     result = Chinwag::generate(@latin_dict, :sentences, amount, amount)
 
     expect(result.split(/[\.!\?]/).length).to eq(amount)
   end
 
   it "generates paragraphs" do
-    amount = rand(1500..2500)
+    amount = rand(1000) + 1500
     result = Chinwag::generate(@latin_dict, :paragraphs, amount, amount)
 
     expect(result.split(/\n\n/).length).to eq(amount)
