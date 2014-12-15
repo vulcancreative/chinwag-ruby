@@ -5,6 +5,8 @@ VALUE c_cw_dict;
 
 VALUE default_dict;
 VALUE default_output_type;
+VALUE default_min_output;
+VALUE default_max_output;
 
 cw_t get_cw_t_for_symbol(VALUE symbol)
 {
@@ -32,7 +34,8 @@ VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
   dict_t* d;
   VALUE result;
   cw_t cw_type = get_cw_t_for_symbol(default_output_type);
-  long min = DEFAULT_MIN_OUTPUT_LENGTH, max = DEFAULT_MAX_OUTPUT_LENGTH;
+  long min = NUM2LONG(default_min_output);
+  long max = NUM2LONG(default_max_output);
   char* output, *e;
 
   // raise exception if passed wrong number of arguments
@@ -132,6 +135,56 @@ VALUE m_set_d_type(VALUE obj, VALUE sym)
   {
     rb_raise(rb_eTypeError, "invalid type (expected :letters, :words, "
     ":sentences, or :paragraphs)");
+  }
+
+  return original;
+}
+
+VALUE m_s_min(VALUE obj, VALUE num)
+{
+  VALUE original = default_min_output;
+
+  Check_Type(num, T_FIXNUM);
+
+  default_min_output = num;
+
+  long min = NUM2LONG(default_min_output);
+  long max = NUM2LONG(default_max_output);
+
+  if(max < min)
+  {
+    rb_raise(rb_eException,"upper threshold must be more than lower "
+    "threshold (min : %lu, max : %lu)", min, max);
+  }
+
+  if(min < 1 || max > 10000)
+  {
+    rb_raise(rb_eRangeError,"out of range (1..10000)");
+  }
+
+  return original;
+}
+
+VALUE m_s_max(VALUE obj, VALUE num)
+{
+  VALUE original = default_max_output;
+
+  Check_Type(num, T_FIXNUM);
+
+  default_max_output = num;
+
+  long min = NUM2LONG(default_min_output);
+  long max = NUM2LONG(default_max_output);
+
+  if(max < min)
+  {
+    rb_raise(rb_eException,"upper threshold must be more than lower "
+    "threshold (min : %lu, max : %lu)", min, max);
+  }
+
+  if(min < 1 || max > 10000)
+  {
+    rb_raise(rb_eRangeError,"out of range (1..10000)");
   }
 
   return original;
@@ -679,6 +732,8 @@ void Init_chinwag()
   rb_define_module_function(m_chinwag, "generate", m_cw_generate, -1);
   rb_define_module_function(m_chinwag, "set_default_dict", m_set_d_dict, 1);
   rb_define_module_function(m_chinwag, "set_default_type", m_set_d_type, 1);
+  rb_define_module_function(m_chinwag, "set_default_min_output",m_s_min,1);
+  rb_define_module_function(m_chinwag, "set_default_max_output",m_s_max,1);
   
   // sync up class methods
   rb_define_singleton_method(c_cw_dict, "open", c_cw_dict_open, -1);
@@ -728,4 +783,10 @@ void Init_chinwag()
 
   // set default output type
   default_output_type = ID2SYM(rb_intern("words"));
+
+  // set default minimum output amount
+  default_min_output = LONG2NUM(DEFAULT_MIN_OUTPUT_LENGTH);
+
+  // set default maximum output amount
+  default_max_output = LONG2NUM(DEFAULT_MAX_OUTPUT_LENGTH);
 }
