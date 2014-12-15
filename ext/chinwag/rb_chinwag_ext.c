@@ -162,9 +162,14 @@ VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
     switch(TYPE(argv[0]))
     {
       case T_FILE:
+        #ifdef HAVE_RUBY_IO_H
         file_pathname = RFILE(argv[0])->fptr->pathv;
         path_name = StringValueCStr(file_pathname);
         file_ptr = rb_io_stdio_file(RFILE(argv[0])->fptr);
+        #else
+        path_name = RFILE(argv[0])->fptr->path;
+        file_ptr = RFILE(argv[0])->fptr->f;
+        #endif
 
         if(include(path_name, "/") || include(path_name, "\\"))
         {
