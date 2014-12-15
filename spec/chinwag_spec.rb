@@ -189,7 +189,7 @@ describe Chinwag::CWDict do
     @small_mess << %w[this is a quick test of validity]
 
     expect(@seuss_dict).to be_valid
-    expect { @small_mess.valid? }.to raise_error(/dictionary too small/)
+    expect { @small_mess.valid? }.to raise_error(/too few acceptable/)
 
     for i in 0..300 do
       @small_mess << ["more", "test", "words"]
