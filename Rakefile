@@ -8,7 +8,7 @@ Rake::ExtensionTask.new "chinwag" do |ext|
   ext.lib_dir = "lib/chinwag"
 end
 
-s = Gem::Specification.new "chinwag", "0.1.1" do |s|
+s = Gem::Specification.new "chinwag", "0.1.2" do |s|
   s.authors = ["Chris Calo"]
   s.email = ["ccalo@vulcanca.com"]
   s.summary = "A text-synthesis library, for use in layout testing (and more)."
@@ -25,6 +25,8 @@ s = Gem::Specification.new "chinwag", "0.1.1" do |s|
   s.test_files    = s.files.grep(%r{^(test|spec|features)/})
   s.extensions    = Dir["ext/**/extconf.rb"]
   s.require_paths = ["lib", "ext"]
+
+  s.required_ruby_version = '>= 1.8.7'
 end
 
 Gem::PackageTask.new s do end
