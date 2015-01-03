@@ -1,7 +1,7 @@
 #include "rb_chinwag_ext.h"
 
 VALUE m_chinwag;
-VALUE c_cw_dict;
+VALUE c_cwdict;
 
 VALUE default_dict;
 VALUE default_output_type;
@@ -31,7 +31,7 @@ cw_t get_cw_t_for_symbol(VALUE symbol)
 
 VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
   VALUE result;
   cw_t cw_type = get_cw_t_for_symbol(default_output_type);
   long min = NUM2LONG(default_min_output);
@@ -45,9 +45,9 @@ VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
   }
 
   // do stuff with 'em
-  if(argc == 0) Data_Get_Struct(default_dict, dict_t, d);
+  if(argc == 0) Data_Get_Struct(default_dict, cwdict_t, d);
 
-  if(argc >= 1) Data_Get_Struct(argv[0], dict_t, d);
+  if(argc >= 1) Data_Get_Struct(argv[0], cwdict_t, d);
   
   if(argc >= 2) cw_type = get_cw_t_for_symbol(argv[1]);
 
@@ -75,7 +75,7 @@ VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
     rb_raise(rb_eRangeError,"out of range (1..10000)");
   }
 
-  if(!dict_valid(*d, &e))
+  if(!cwdict_valid(*d, &e))
   {
     rb_raise(rb_eException, "%s", e);
     free(e);
@@ -107,14 +107,14 @@ VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
   return result;
 }
 
-VALUE c_cw_dict_clone(VALUE obj);
-VALUE c_cw_dict_close(VALUE obj);
+VALUE c_cwdict_clone(VALUE obj);
+VALUE c_cwdict_close(VALUE obj);
 VALUE m_set_d_dict(VALUE obj, VALUE new)
 {
-  VALUE original = c_cw_dict_clone(default_dict);
+  VALUE original = c_cwdict_clone(default_dict);
 
-  default_dict = c_cw_dict_close(default_dict);
-  default_dict = c_cw_dict_clone(new);
+  default_dict = c_cwdict_close(default_dict);
+  default_dict = c_cwdict_clone(new);
 
   return original;
 }
@@ -190,17 +190,17 @@ VALUE m_s_max(VALUE obj, VALUE num)
   return original;
 }
 
-static void c_cw_dict_free(void* dict)
+static void c_cwdict_free(void* dict)
 {
-  dict_t* d = (dict_t*)dict;
-  if(d->drows && d->count > 0) close_dict(*d);
+  cwdict_t* d = (cwdict_t*)dict;
+  if(d->drows && d->count > 0) cwdict_close(*d);
 }
 
-VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
+VALUE c_cwdict_open(int argc, VALUE* argv, VALUE obj)
 {
   VALUE file_pathname;
   FILE* file_ptr = NULL;
-  dict_t d = open_dict(), path_parts, file_parts;
+  cwdict_t d = cwdict_open(), path_parts, file_parts;
   char* tkns_ptr = NULL; char* name_ptr = NULL;
   char* path_name = NULL; char* file_name = NULL;
   char* name = NULL; bool used_file = false; char* file_buffer = NULL;
@@ -226,7 +226,7 @@ VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
 
         if(include(path_name, "/") || include(path_name, "\\"))
         {
-          path_parts = split(path_name, "/\\");
+          path_parts = split_into_cwdict(path_name, "/\\");
 
           last_drow = path_parts.count - 1;
           last_word = path_parts.drows[last_drow].count - 1;
@@ -236,7 +236,7 @@ VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
           strcpy(file_name, path_parts.drows[last_drow].words[last_word]);
           file_name[len] = '\0';
 
-          close_dict(path_parts);
+          cwdict_close(path_parts);
         }
         else
         {
@@ -247,7 +247,7 @@ VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
 
         if(include(file_name, "."))
         {
-          file_parts = split(file_name, ".");
+          file_parts = split_into_cwdict(file_name, ".");
 
           size_t len = strlen(file_parts.drows[0].words[0]);
 
@@ -255,7 +255,7 @@ VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
           strcpy(name, file_parts.drows[0].words[0]);
           name[len] = '\0';
 
-          close_dict(file_parts);
+          cwdict_close(file_parts);
         }
         else
         {
@@ -282,26 +282,26 @@ VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
   }
 
   // check if tkns references existing, embedded dictionary...
-  if(!tkns_ptr && !name_ptr && !used_file) d = open_dict();
+  if(!tkns_ptr && !name_ptr && !used_file) d = cwdict_open();
   else if(tkns_ptr && !used_file)
   {
     if(strcmp(tkns_ptr, "seussian") == 0)
     {
       if(!name_ptr)
-      d = open_dict_with_name_and_tokens("seussian",dict_seuss,DELIMITERS);
+      d=cwdict_open_with_name_and_tokens("seussian",dict_seuss,DELIMITERS);
       else
-      d = open_dict_with_name_and_tokens(name_ptr,dict_seuss,DELIMITERS);
+      d=cwdict_open_with_name_and_tokens(name_ptr,dict_seuss,DELIMITERS);
     }
     else if(strcmp(tkns_ptr, "latin") == 0)
     {
       if(!name_ptr)
-      d = open_dict_with_name_and_tokens("latin", dict_latin,DELIMITERS);
+      d=cwdict_open_with_name_and_tokens("latin", dict_latin,DELIMITERS);
       else
-      d = open_dict_with_name_and_tokens(name_ptr, dict_latin,DELIMITERS);
+      d=cwdict_open_with_name_and_tokens(name_ptr, dict_latin,DELIMITERS);
     }
   }
   // ...else, if just a name was passed...
-  else if(name_ptr && !used_file) d = open_dict_with_name(name_ptr);
+  else if(name_ptr && !used_file) d = cwdict_open_with_name(name_ptr);
   // ...else, see if file exists by passed name...
   else if(used_file && name && file_ptr)
   {
@@ -312,52 +312,52 @@ VALUE c_cw_dict_open(int argc, VALUE* argv, VALUE obj)
       file_name);
     }
 
-    d = open_dict_with_name_and_tokens(name, file_buffer, DELIMITERS);
+    d=cwdict_open_with_name_and_tokens(name, file_buffer, DELIMITERS);
 
     free(file_buffer);
   }
   // ...else, return a blank dictionary
 
   // create a dictionary pointer
-  dict_t* d_ptr = (dict_t*)malloc(sizeof(dict_t));
+  cwdict_t* d_ptr = (cwdict_t*)malloc(sizeof(cwdict_t));
   *d_ptr = d;
 
   if(name) free(name);
   if(file_name) free(file_name);
 
-  return Data_Wrap_Struct(c_cw_dict, 0, c_cw_dict_free, d_ptr);
+  return Data_Wrap_Struct(c_cwdict, 0, c_cwdict_free, d_ptr);
 }
 
-VALUE c_cw_dict_close(VALUE obj)
+VALUE c_cwdict_close(VALUE obj)
 {
-  dict_t* d;
-  dict_t empty;
+  cwdict_t* d;
+  cwdict_t empty;
 
   // get original pointer from Ruby VM and close
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
-  if(d->drows && d->count > 0) { *d = close_dict(*d); }
+  if(d->drows && d->count > 0) { *d = cwdict_close(*d); }
   
   return obj;
 }
 
-VALUE c_cw_dict_name_g(VALUE obj)
+VALUE c_cwdict_name_g(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
   if(d->name && strlen(d->name) > 0) return rb_str_new2(d->name);
   return rb_str_new2("");
 }
 
-VALUE c_cw_dict_name_s(VALUE obj, VALUE name)
+VALUE c_cwdict_name_s(VALUE obj, VALUE name)
 {
-  dict_t* d; long len = RSTRING_LEN(name);
+  cwdict_t* d; long len = RSTRING_LEN(name);
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
   d->name = (char*)malloc(len + 1);
   strcpy(d->name, StringValueCStr(name));
@@ -366,155 +366,155 @@ VALUE c_cw_dict_name_s(VALUE obj, VALUE name)
   return obj;
 }
 
-VALUE c_cw_dict_length(VALUE obj)
+VALUE c_cwdict_length(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
   if(d->count == 0) return INT2NUM(0);
-  return LONG2NUM(total_dict(*d));
+  return LONG2NUM(cwdict_length(*d));
 }
 
-VALUE c_cw_dict_join(int argc, VALUE* argv, VALUE obj)
+VALUE c_cwdict_join(int argc, VALUE* argv, VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // raise exception if passed wrong number of arguments
   if(argc > 1) rb_raise(rb_eArgError, "wrong number of arguments");
   if(argc == 1) Check_Type(argv[0], T_STRING);
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
-  if(argc == 0) return rb_str_new2(join_dict(*d, " "));
-  return rb_str_new2(join_dict(*d, StringValueCStr(argv[0])));
+  if(argc == 0) return rb_str_new2(cwdict_join(*d, " "));
+  return rb_str_new2(cwdict_join(*d, StringValueCStr(argv[0])));
 }
 
-VALUE c_cw_dict_clone(VALUE obj)
+VALUE c_cwdict_clone(VALUE obj)
 {
-  dict_t* d, *new_p;
+  cwdict_t* d, *new_p;
   VALUE new;
 
   // open new dict for return value
   VALUE args[] = { rb_str_new2(""), rb_str_new2("") };
-  new = c_cw_dict_open(2, args, new);
+  new = c_cwdict_open(2, args, new);
 
   // get original pointers from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
-  Data_Get_Struct(new, dict_t, new_p);
+  Data_Get_Struct(obj, cwdict_t, d);
+  Data_Get_Struct(new, cwdict_t, new_p);
 
   // get a copy of the original dictionary
-  *new_p = deep_copy_dict(*d);
+  *new_p = cwdict_copy(*d);
 
   return new;
 }
 
-VALUE c_cw_dict_sample(VALUE obj)
+VALUE c_cwdict_sample(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
-  return rb_str_new2(sample_dict(*d));
+  return rb_str_new2(cwdict_sample(*d));
 }
 
-VALUE c_cw_dict_sort(VALUE obj)
+VALUE c_cwdict_sort(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
   VALUE new;
 
   // get a new copy of the original dict
-  new = c_cw_dict_clone(obj);
+  new = c_cwdict_clone(obj);
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(new, dict_t, d);
+  Data_Get_Struct(new, cwdict_t, d);
 
-  *d = bubble_dict(*d);
+  *d = cwdict_sort(*d);
 
   return new;
 }
 
-VALUE c_cw_dict_prune(VALUE obj)
+VALUE c_cwdict_prune(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
   VALUE new;
 
   // get a new copy of the original dict
-  new = c_cw_dict_clone(obj);
+  new = c_cwdict_clone(obj);
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(new, dict_t, d);
+  Data_Get_Struct(new, cwdict_t, d);
 
-  *d = prune_dict(*d, false);
+  *d = cwdict_prune(*d, false);
 
   return new;
 }
 
-VALUE c_cw_dict_clean(VALUE obj)
+VALUE c_cwdict_clean(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
   VALUE new;
 
   // get a new copy of the original dict
-  new = c_cw_dict_clone(obj);
+  new = c_cwdict_clone(obj);
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(new, dict_t, d);
+  Data_Get_Struct(new, cwdict_t, d);
 
-  *d = prune_dict(*d, true);
+  *d = cwdict_prune(*d, true);
 
   return new;
 }
 
-VALUE c_cw_dict_sort_s(VALUE obj)
+VALUE c_cwdict_sort_s(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
-  *d = bubble_dict(*d);
+  *d = cwdict_sort(*d);
 
   return obj;
 }
 
-VALUE c_cw_dict_prune_s(VALUE obj)
+VALUE c_cwdict_prune_s(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
-  *d = prune_dict(*d, false);
+  *d = cwdict_prune(*d, false);
 
   return obj;
 }
 
-VALUE c_cw_dict_clean_s(VALUE obj)
+VALUE c_cwdict_clean_s(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
-  *d = prune_dict(*d, true);
+  *d = cwdict_prune(*d, true);
 
   return obj;
 }
 
-VALUE c_cw_dict_validate_s(VALUE obj)
+VALUE c_cwdict_validate_s(VALUE obj)
 {
   char* e;
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
   // handle invalid state first (for error handling's sake)
-  if(!dict_valid(*d, &e))
+  if(!cwdict_valid(*d, &e))
   {
     rb_raise(rb_eException, "%s", e);
     free(e);
@@ -523,27 +523,27 @@ VALUE c_cw_dict_validate_s(VALUE obj)
   return obj;
 }
 
-VALUE c_cw_dict_named_q(VALUE obj)
+VALUE c_cwdict_named_q(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
   if(d->name && strlen(d->name) > 0) return Qtrue;
   return Qfalse;
 }
 
-VALUE c_cw_dict_valid_q(VALUE obj)
+VALUE c_cwdict_valid_q(VALUE obj)
 {
   char* e;
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
   // handle invalid state first (for error handling's sake)
-  if(!dict_valid(*d, &e))
+  if(!cwdict_valid(*d, &e))
   {
     rb_raise(rb_eException, "%s", e);
     free(e);
@@ -554,47 +554,47 @@ VALUE c_cw_dict_valid_q(VALUE obj)
   return Qtrue;
 }
 
-VALUE c_cw_dict_sorted_q(VALUE obj)
+VALUE c_cwdict_sorted_q(VALUE obj)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
   if(d->sorted) return Qtrue;
   return Qfalse;
 }
 
-VALUE c_cw_dict_include_q(VALUE obj, VALUE string)
+VALUE c_cwdict_include_q(VALUE obj, VALUE string)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
-  if(dict_include(*d, StringValueCStr(string))) return Qtrue;
+  if(cwdict_include(*d, StringValueCStr(string))) return Qtrue;
   return Qfalse;
 }
 
-VALUE c_cw_dict_exclude_q(VALUE obj, VALUE string)
+VALUE c_cwdict_exclude_q(VALUE obj, VALUE string)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
-  if(dict_exclude(*d, StringValueCStr(string))) return Qtrue;
+  if(cwdict_exclude(*d, StringValueCStr(string))) return Qtrue;
   return Qfalse;
 }
 
-VALUE c_cw_dict_inspect(VALUE obj)
+VALUE c_cwdict_inspect(VALUE obj)
 {
-  dict_t* dict; VALUE str;
+  cwdict_t* dict; VALUE str;
   size_t count = 0; int multiplier = 1; int word_len = 0;
   char* result = (char*)malloc(LARGE_BUFFER * multiplier + 1);
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, dict);
+  Data_Get_Struct(obj, cwdict_t, dict);
 
   // add opening delimiter
   strcpy(result, "["); ++count;
@@ -657,29 +657,29 @@ VALUE c_cw_dict_inspect(VALUE obj)
   return str;
 }
 
-VALUE c_cw_dict_to_s(VALUE obj)
+VALUE c_cwdict_to_s(VALUE obj)
 {
-  dict_t* dict;
+  cwdict_t* dict;
   size_t count = 0; int multiplier = 1;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, dict);
+  Data_Get_Struct(obj, cwdict_t, dict);
 
   // if(dict->drows && dict->count > 0) return Qnil;
-  return c_cw_dict_inspect(obj);
+  return c_cwdict_inspect(obj);
 }
 
-VALUE c_cw_dict_append_op(VALUE obj, VALUE addend)
+VALUE c_cwdict_append_op(VALUE obj, VALUE addend)
 {
-  dict_t* d;
+  cwdict_t* d;
 
   // get original pointer from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
+  Data_Get_Struct(obj, cwdict_t, d);
 
   switch(TYPE(addend))
   {
     case T_STRING:
-      *d = place_word_in_dict_strict(*d, StringValueCStr(addend));
+      *d = cwdict_place_word_strict(*d, StringValueCStr(addend));
       break;
     case T_ARRAY:
       for(long i = 0; i != RARRAY_LEN(addend); ++i)
@@ -694,7 +694,7 @@ VALUE c_cw_dict_append_op(VALUE obj, VALUE addend)
         VALUE entry = rb_ary_entry(addend, i);
         char* entry_str = StringValueCStr(entry);
 
-        *d = place_word_in_dict_strict(*d, entry_str);
+        *d = cwdict_place_word_strict(*d, entry_str);
       }
 
       break;
@@ -703,46 +703,46 @@ VALUE c_cw_dict_append_op(VALUE obj, VALUE addend)
       break;
   }
 
-  if(d->sorted) return c_cw_dict_sort(obj);
+  if(d->sorted) return c_cwdict_sort(obj);
   return obj;
 }
 
-VALUE c_cw_dict_add_op(VALUE obj, VALUE addend)
+VALUE c_cwdict_add_op(VALUE obj, VALUE addend)
 {
   VALUE new;
 
   // get a clone of the original
-  new = c_cw_dict_clone(obj);
+  new = c_cwdict_clone(obj);
 
-  return c_cw_dict_append_op(new, addend);
+  return c_cwdict_append_op(new, addend);
 }
 
-VALUE c_cw_dict_add_assign_op(VALUE obj, VALUE addend)
+VALUE c_cwdict_add_assign_op(VALUE obj, VALUE addend)
 {
-  return c_cw_dict_append_op(obj, addend);
+  return c_cwdict_append_op(obj, addend);
 }
 
-VALUE c_cw_dict_check_equality(VALUE obj, VALUE against)
+VALUE c_cwdict_check_equality(VALUE obj, VALUE against)
 {
-  dict_t* d, *comparison;
+  cwdict_t* d, *comparison;
 
   // get original pointers from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
-  Data_Get_Struct(against, dict_t, comparison);
+  Data_Get_Struct(obj, cwdict_t, d);
+  Data_Get_Struct(against, cwdict_t, comparison);
 
-  if(dict_equal(*d, *comparison)) return Qtrue;
+  if(cwdict_equal(*d, *comparison)) return Qtrue;
   return Qfalse;
 }
 
-VALUE c_cw_dict_check_inequality(VALUE obj, VALUE against)
+VALUE c_cwdict_check_inequality(VALUE obj, VALUE against)
 {
-  dict_t* d, *comparison;
+  cwdict_t* d, *comparison;
 
   // get original pointers from Ruby VM
-  Data_Get_Struct(obj, dict_t, d);
-  Data_Get_Struct(against, dict_t, comparison);
+  Data_Get_Struct(obj, cwdict_t, d);
+  Data_Get_Struct(against, cwdict_t, comparison);
 
-  if(dict_not_equal(*d, *comparison)) return Qtrue;
+  if(cwdict_inequal(*d, *comparison)) return Qtrue;
   return Qfalse;
 }
 
@@ -750,7 +750,7 @@ void Init_chinwag()
 {
   // setup module extension and containing class(es)
   m_chinwag = rb_define_module("Chinwag");
-  c_cw_dict = rb_define_class_under(m_chinwag, "CWDict", rb_cObject);
+  c_cwdict = rb_define_class_under(m_chinwag, "CWDict", rb_cObject);
 
   // sync up module generation functions
   rb_define_module_function(m_chinwag, "generate", m_cw_generate, -1);
@@ -760,50 +760,50 @@ void Init_chinwag()
   rb_define_module_function(m_chinwag, "set_default_max_output",m_s_max,1);
   
   // sync up class methods
-  rb_define_singleton_method(c_cw_dict, "open", c_cw_dict_open, -1);
-  rb_define_method(c_cw_dict, "close", c_cw_dict_close, 0);
+  rb_define_singleton_method(c_cwdict, "open", c_cwdict_open, -1);
+  rb_define_method(c_cwdict, "close", c_cwdict_close, 0);
 
-  rb_define_method(c_cw_dict, "name", c_cw_dict_name_g, 0);
-  rb_define_method(c_cw_dict, "name=", c_cw_dict_name_s, 1);
-  rb_define_method(c_cw_dict, "length", c_cw_dict_length, 0);
+  rb_define_method(c_cwdict, "name", c_cwdict_name_g, 0);
+  rb_define_method(c_cwdict, "name=", c_cwdict_name_s, 1);
+  rb_define_method(c_cwdict, "length", c_cwdict_length, 0);
 
-  rb_define_method(c_cw_dict, "join", c_cw_dict_join, -1);
-  rb_define_method(c_cw_dict, "clone", c_cw_dict_clone, 0);
-  rb_define_method(c_cw_dict, "sample", c_cw_dict_sample, 0);
+  rb_define_method(c_cwdict, "join", c_cwdict_join, -1);
+  rb_define_method(c_cwdict, "clone", c_cwdict_clone, 0);
+  rb_define_method(c_cwdict, "sample", c_cwdict_sample, 0);
 
-  rb_define_method(c_cw_dict, "sort", c_cw_dict_sort, 0);
-  rb_define_method(c_cw_dict, "prune", c_cw_dict_prune, 0);
-  rb_define_method(c_cw_dict, "clean", c_cw_dict_clean, 0);
+  rb_define_method(c_cwdict, "sort", c_cwdict_sort, 0);
+  rb_define_method(c_cwdict, "prune", c_cwdict_prune, 0);
+  rb_define_method(c_cwdict, "clean", c_cwdict_clean, 0);
 
-  rb_define_method(c_cw_dict, "sort!", c_cw_dict_sort_s, 0);
-  rb_define_method(c_cw_dict, "prune!", c_cw_dict_prune_s, 0);
-  rb_define_method(c_cw_dict, "clean!", c_cw_dict_clean_s, 0);
-  rb_define_method(c_cw_dict, "validate!", c_cw_dict_validate_s, 0);
+  rb_define_method(c_cwdict, "sort!", c_cwdict_sort_s, 0);
+  rb_define_method(c_cwdict, "prune!", c_cwdict_prune_s, 0);
+  rb_define_method(c_cwdict, "clean!", c_cwdict_clean_s, 0);
+  rb_define_method(c_cwdict, "validate!", c_cwdict_validate_s, 0);
 
-  rb_define_method(c_cw_dict, "named?", c_cw_dict_named_q, 0);
-  rb_define_method(c_cw_dict, "valid?", c_cw_dict_valid_q, 0);
-  rb_define_method(c_cw_dict, "sorted?", c_cw_dict_sorted_q, 0);
-  rb_define_method(c_cw_dict, "include?", c_cw_dict_include_q, 1);
-  rb_define_method(c_cw_dict, "exclude?", c_cw_dict_exclude_q, 1);
+  rb_define_method(c_cwdict, "named?", c_cwdict_named_q, 0);
+  rb_define_method(c_cwdict, "valid?", c_cwdict_valid_q, 0);
+  rb_define_method(c_cwdict, "sorted?", c_cwdict_sorted_q, 0);
+  rb_define_method(c_cwdict, "include?", c_cwdict_include_q, 1);
+  rb_define_method(c_cwdict, "exclude?", c_cwdict_exclude_q, 1);
 
-  rb_define_method(c_cw_dict, "inspect", c_cw_dict_inspect, 0);
-  rb_define_method(c_cw_dict, "to_s", c_cw_dict_to_s, 0);
+  rb_define_method(c_cwdict, "inspect", c_cwdict_inspect, 0);
+  rb_define_method(c_cwdict, "to_s", c_cwdict_to_s, 0);
 
   // operator methods
-  rb_define_method(c_cw_dict, "+", c_cw_dict_add_op, 1);
-  rb_define_method(c_cw_dict, "+=", c_cw_dict_add_assign_op, 1);
-  rb_define_method(c_cw_dict, "<<", c_cw_dict_append_op, 1);
-  rb_define_method(c_cw_dict, "==", c_cw_dict_check_equality, 1);
-  rb_define_method(c_cw_dict, "!=", c_cw_dict_check_inequality, 1);
+  rb_define_method(c_cwdict, "+", c_cwdict_add_op, 1);
+  rb_define_method(c_cwdict, "+=", c_cwdict_add_assign_op, 1);
+  rb_define_method(c_cwdict, "<<", c_cwdict_append_op, 1);
+  rb_define_method(c_cwdict, "==", c_cwdict_check_equality, 1);
+  rb_define_method(c_cwdict, "!=", c_cwdict_check_inequality, 1);
 
   // method aliases
-  rb_define_alias(c_cw_dict, "dup", "clone");
-  rb_define_alias(c_cw_dict, "size", "length");
-  rb_define_alias(c_cw_dict, "count", "length");
+  rb_define_alias(c_cwdict, "dup", "clone");
+  rb_define_alias(c_cwdict, "size", "length");
+  rb_define_alias(c_cwdict, "count", "length");
 
   // open Seussian dict as default fall-back
   VALUE args[] = { rb_str_new2("seussian") };
-  default_dict = c_cw_dict_open(1, args, default_dict);
+  default_dict = c_cwdict_open(1, args, default_dict);
 
   // set default output type
   default_output_type = ID2SYM(rb_intern("words"));

@@ -3,7 +3,10 @@
 
 #include "chinwag.h"
 
-U32 stringify_file(char** buffer, FILE* fp);
-dict_t tokenize(const char* const buffer, const char* delimiters);
+U32 stringify_file
+(char** buffer, FILE* fp);
+
+cwdict_t tokenize
+(const char* const buffer, const char* delimiters);
 
 #endif

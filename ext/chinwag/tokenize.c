@@ -1,6 +1,7 @@
 #include "tokenize.h"
 
-U32 stringify_file(char** buffer, FILE* fp)
+U32 stringify_file
+(char** buffer, FILE* fp)
 {
   // setup
   U64 sz = 0;
@@ -22,11 +23,12 @@ U32 stringify_file(char** buffer, FILE* fp)
   return sz;
 }
 
-dict_t tokenize(const char* const buffer, const char* delimiters)
+cwdict_t tokenize
+(const char* const buffer, const char* delimiters)
 {
   char* tok;
   char* mutable_buffer = (char*)malloc(strlen(buffer) + 1 * sizeof(char));
-  dict_t dict = open_dict();
+  cwdict_t dict = cwdict_open();
 
   // get mutable copy of buffer; a bit slower, but allows for const-ness
   strcpy(mutable_buffer, buffer);
@@ -37,7 +39,7 @@ dict_t tokenize(const char* const buffer, const char* delimiters)
   while(tok != NULL)
   {
     // add tok to dict
-    dict = place_word_in_dict_strict(dict, tok);
+    dict = cwdict_place_word_strict(dict, tok);
 
     // get new tok (if any)
     tok = strtok(NULL, delimiters);
@@ -47,7 +49,7 @@ dict_t tokenize(const char* const buffer, const char* delimiters)
   free(mutable_buffer);
 
   // clean up dict
-  dict = prune_dict(dict, true);
+  dict = cwdict_prune(dict, true);
 
   return dict;
 }

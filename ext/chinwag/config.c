@@ -1,13 +1,13 @@
 #include "config.h"
 
 const unsigned MAJOR_VERSION = 1;
-const unsigned MINOR_VERSION = 1;
-const unsigned PATCH_VERSION = 4;
+const unsigned MINOR_VERSION = 2;
+const unsigned PATCH_VERSION = 0;
 
-const char* const DATE_YEAR = "2014";
-const char* const DATE_MONTH = "12";
-const char* const DATE_DAY = "02";
-const char* const REVISION = "743";
+const char* const DATE_YEAR = "2015";
+const char* const DATE_MONTH = "01";
+const char* const DATE_DAY = "03";
+const char* const REVISION = "914";
 
 const unsigned SMALL_BUFFER = 1024;
 const unsigned LARGE_BUFFER = 5120;

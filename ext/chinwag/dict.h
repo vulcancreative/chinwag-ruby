@@ -3,50 +3,90 @@
 
 #include "chinwag.h"
 
-// dictionary row utilities
-drow_t open_drow();
-drow_t add_word_to_drow(drow_t drow, const char* word);
-drow_t add_word_to_drow_limit(drow_t drow, const char* word, U32 size);
-drow_t bubble_drow(drow_t drow);
-bool drow_word_blank(drow_t drow, U32 i);
-bool drow_word_present(drow_t drow, U32 i);
-bool drow_exclude(drow_t drow, char const* str);
-bool drow_include(drow_t drow, char const* str);
-char* sample_drow(drow_t drow);
-void puts_drow(drow_t drow);
-void close_drow(drow_t drow);
+// exposed dictionary row routines
+char* cwdrow_sample
+(cwdrow_t drow);
 
 // dictionary utilities
-dict_t open_dict();
-dict_t open_dict_with_name(const char* name);
-dict_t open_dict_with_tokens(const char* const buffer, const char* delimiters);
-dict_t open_dict_with_name_and_tokens(const char* name, const char* const buffer, const char* delimiters);
-dict_t add_drow_to_dict(dict_t dict, drow_t drow);
-dict_t add_drow_to_dict_strict(dict_t dict, drow_t drow, U32 size);
-dict_t place_word_in_dict(dict_t dict, const char* word);
-dict_t place_words_in_dict(dict_t dict, const char* const* words, U32 s);
-dict_t place_word_in_dict_strict(dict_t dict, const char* word);
-dict_t place_words_in_dict_strict(dict_t dict, const char* const* words, U32 s);
-dict_t bubble_dict(dict_t dict);
-dict_t prune_dict(dict_t dict, bool sorted);
-dict_t map_dict(dict_t dict, char* (*f)(char*));
-dict_t deep_copy_dict(dict_t dict);
-bool dict_exclude(dict_t dict, char const* str);
-bool dict_include(dict_t dict, char const* str);
-bool dict_any_blanks(dict_t dict);
-bool dict_valid(dict_t dict, char** error);
-bool dict_equal(dict_t dict, dict_t against);
-bool dict_not_equal(dict_t dict, dict_t against);
-I32 find_drow_of_size_in_dict(dict_t dict, U32 largest);
-U32 total_dict(dict_t dict);
-U32 dict_largest(dict_t dict);
-char* sample_dict(dict_t dict);
-char* join_dict(dict_t dict, char const* delimiter);
-void puts_dict(dict_t dict);
-dict_t close_dict(dict_t dict);
+cwdict_t cwdict_open();
+
+cwdict_t cwdict_open_with_name
+(const char* name);
+
+cwdict_t cwdict_open_with_tokens
+(const char* const buffer, const char* delimiters);
+
+cwdict_t cwdict_open_with_name_and_tokens
+(const char* name, const char* const buffer, const char* delimiters);
+
+cwdict_t cwdict_add_row
+(cwdict_t dict, cwdrow_t drow);
+
+cwdict_t cwdict_add_row_strict
+(cwdict_t dict, cwdrow_t drow, U32 size);
+
+cwdict_t cwdict_place_word
+(cwdict_t dict, const char* word);
+
+cwdict_t cwdict_place_words
+(cwdict_t dict, const char* const* words, U32 s);
+
+cwdict_t cwdict_place_word_strict
+(cwdict_t dict, const char* word);
+
+cwdict_t cwdict_place_words_strict
+(cwdict_t dict, const char* const* words, U32 s);
+
+cwdict_t cwdict_sort
+(cwdict_t dict);
+
+cwdict_t cwdict_prune
+(cwdict_t dict, bool sorted);
+
+cwdict_t cwdict_map
+(cwdict_t dict, char* (*f)(char*));
+
+cwdict_t cwdict_copy
+(cwdict_t dict);
+
+bool cwdict_exclude
+(cwdict_t dict, char const* str);
+
+bool cwdict_include
+(cwdict_t dict, char const* str);
+
+bool cwdict_valid
+(cwdict_t dict, char** error);
+
+bool cwdict_equal
+(cwdict_t dict, cwdict_t against);
+
+bool cwdict_inequal
+(cwdict_t dict, cwdict_t against);
+
+U32 cwdict_length
+(cwdict_t dict);
+
+U32 cwdict_largest
+(cwdict_t dict);
+
+char* cwdict_sample
+(cwdict_t dict);
+
+char* cwdict_join
+(cwdict_t dict, char const* delimiter);
+
+cwdict_t cwdict_close
+(cwdict_t dict);
 
 // secondary utilities
-void validate_dict(dict_t dict, char const* function_name);
-dict_t split(const char* buffer, const char* delimiters);
+void puts_cwdict
+(cwdict_t dict);
+
+void validate_cwdict
+(cwdict_t dict, char const* function_name);
+
+cwdict_t split_into_cwdict
+(const char* buffer, const char* delimiters);
 
 #endif

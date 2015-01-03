@@ -36,15 +36,15 @@ typedef struct dictionary_type {
   unsigned long largest;
   unsigned long largest_pos;
   char** words;
-} drow_t;
+} cwdrow_t;
 
 // dictionary (row container)
 typedef struct dictionary_container_type {
   bool sorted;
   unsigned long count;
-  drow_t* drows;
+  cwdrow_t* drows;
   char* name;
-} dict_t;
+} cwdict_t;
 
 #include "seuss.h"
 #include "latin.h"
@@ -56,16 +56,24 @@ typedef struct dictionary_container_type {
 #include "config.h"
 #include "dict.h"
 
-char* chinwag(cw_t type, unsigned long min, unsigned long max, dict_t dict);
+char* chinwag
+(cw_t type, unsigned long min, unsigned long max, cwdict_t dict);
 
-#define ltr(amt, dict) ltr_rng(amt, amt, dict)
-#define wrd(amt, dict) wrd_rng(amt, amt, dict)
-#define snt(amt, dict) snt_rng(amt, amt, dict)
-#define pgf(amt, dict) pgf_rng(amt, amt, dict)
+char* cw_ltr_rng
+(unsigned long min, unsigned long max, cwdict_t dict);
 
-char* ltr_rng(unsigned long min, unsigned long max, dict_t dict);
-char* wrd_rng(unsigned long min, unsigned long max, dict_t dict);
-char* snt_rng(unsigned long min, unsigned long max, dict_t dict);
-char* pgf_rng(unsigned long min, unsigned long max, dict_t dict);
+char* cw_wrd_rng
+(unsigned long min, unsigned long max, cwdict_t dict);
+
+char* cw_snt_rng
+(unsigned long min, unsigned long max, cwdict_t dict);
+
+char* cw_pgf_rng
+(unsigned long min, unsigned long max, cwdict_t dict);
+
+#define cw_ltr(amt, dict) cw_ltr_rng(amt, amt, dict)
+#define cw_wrd(amt, dict) cw_wrd_rng(amt, amt, dict)
+#define cw_snt(amt, dict) cw_snt_rng(amt, amt, dict)
+#define cw_pgf(amt, dict) cw_pgf_rng(amt, amt, dict)
 
 #endif

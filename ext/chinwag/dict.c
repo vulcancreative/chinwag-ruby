@@ -1,8 +1,45 @@
 #include "dict.h"
 
-drow_t open_drow()
+// dictionary row utilities
+cwdrow_t cwdrow_open();
+
+cwdrow_t cwdrow_add_word
+(cwdrow_t drow, const char* word);
+
+cwdrow_t cwdrow_add_word_strict
+(cwdrow_t drow, const char* word, U32 size);
+
+cwdrow_t cwdrow_sort
+(cwdrow_t drow);
+
+bool cwdrow_word_blank
+(cwdrow_t drow, U32 i);
+
+bool cwdrow_word_present
+(cwdrow_t drow, U32 i);
+
+bool cwdrow_exclude
+(cwdrow_t drow, char const* str);
+
+bool cwdrow_include
+(cwdrow_t drow, char const* str);
+
+void cwdrow_close
+(cwdrow_t drow);
+
+void puts_cwdrow
+(cwdrow_t drow);
+
+// dictionary utilities
+I32 cwdict_find_row_of_size
+(cwdict_t dict, U32 largest);
+
+bool cwdict_blanks
+(cwdict_t dict);
+
+cwdrow_t cwdrow_open()
 {
-  drow_t d;
+  cwdrow_t d;
 
   // set default values
   d.sorted = false;
@@ -14,7 +51,8 @@ drow_t open_drow()
   return d;
 }
 
-drow_t add_word_to_drow(drow_t drow, const char* word)
+cwdrow_t cwdrow_add_word
+(cwdrow_t drow, const char* word)
 {
   // cache strlen of word
   U32 len = strlen(word);
@@ -43,17 +81,19 @@ drow_t add_word_to_drow(drow_t drow, const char* word)
   return drow;
 }
 
-drow_t add_word_to_drow_limit(drow_t drow, const char* word, U32 size)
+cwdrow_t cwdrow_add_word_strict
+(cwdrow_t drow, const char* word, U32 size)
 {
-  if(strlen(word) == size) drow = add_word_to_drow(drow, word);
+  if(strlen(word) == size) drow = cwdrow_add_word(drow, word);
   return drow;
 }
 
-drow_t bubble_drow(drow_t drow)
+cwdrow_t cwdrow_sort
+(cwdrow_t drow)
 {
   for(U32 i = 0; i != drow.count - 1; ++i)
   {
-    if(drow_word_blank(drow, i) && drow_word_present(drow, i + 1))
+    if(cwdrow_word_blank(drow, i) && cwdrow_word_present(drow, i + 1))
     {
       // bubble next one into current one
       U32 len = strlen(drow.words[i + 1]);
@@ -75,7 +115,8 @@ drow_t bubble_drow(drow_t drow)
   return drow;
 }
 
-bool drow_word_blank(drow_t drow, U32 i)
+bool cwdrow_word_blank
+(cwdrow_t drow, U32 i)
 {
   if(drow.words[i] == NULL || strlen(drow.words[i]) < 1)
   {
@@ -85,7 +126,8 @@ bool drow_word_blank(drow_t drow, U32 i)
   return false;
 }
 
-bool drow_word_present(drow_t drow, U32 i)
+bool cwdrow_word_present
+(cwdrow_t drow, U32 i)
 {
   if(drow.words[i] != NULL && strlen(drow.words[i]) > 0)
   {
@@ -95,7 +137,8 @@ bool drow_word_present(drow_t drow, U32 i)
   return false;
 }
 
-bool drow_exclude(drow_t drow, char const* str)
+bool cwdrow_exclude
+(cwdrow_t drow, char const* str)
 {
   for(U32 i = 0; i != drow.count; ++i)
   {
@@ -105,7 +148,8 @@ bool drow_exclude(drow_t drow, char const* str)
   return true;
 }
 
-bool drow_include(drow_t drow, char const* str)
+bool cwdrow_include
+(cwdrow_t drow, char const* str)
 {
   for(U32 i = 0; i != drow.count; ++i)
   {
@@ -115,7 +159,8 @@ bool drow_include(drow_t drow, char const* str)
   return false;
 }
 
-char* sample_drow(drow_t drow)
+char* cwdrow_sample
+(cwdrow_t drow)
 {
   // immediately fail if empty
   if(drow.count == 0) return NULL;
@@ -126,7 +171,19 @@ char* sample_drow(drow_t drow)
   return drow.words[internal];
 }
 
-void puts_drow(drow_t drow)
+void cwdrow_close
+(cwdrow_t drow)
+{
+  for(U32 i = 0; i != drow.count; ++i)
+  {
+    if(drow.words[i]) free(drow.words[i]);
+  }
+
+  if(drow.words) free(drow.words);
+}
+
+void puts_cwdrow
+(cwdrow_t drow)
 {
   #ifdef DEBUG
   fprintf(stdout, "(%d)", drow.count);
@@ -143,19 +200,12 @@ void puts_drow(drow_t drow)
   fprintf(stdout, "]");
 }
 
-void close_drow(drow_t drow)
-{
-  for(U32 i = 0; i != drow.count; ++i)
-  {
-    if(drow.words[i]) free(drow.words[i]);
-  }
+I32 cwdict_find_row_of_size
+(cwdict_t dict, U32 largest);
 
-  if(drow.words) free(drow.words);
-}
-
-dict_t open_dict()
+cwdict_t cwdict_open()
 {
-  dict_t d;
+  cwdict_t d;
 
   // set default values
   d.sorted = false;
@@ -166,9 +216,10 @@ dict_t open_dict()
   return d;
 }
 
-dict_t open_dict_with_name(const char* name)
+cwdict_t cwdict_open_with_name
+(const char* name)
 {
-  dict_t d;
+  cwdict_t d;
 
   // set default values
   d.sorted = false;
@@ -182,17 +233,19 @@ dict_t open_dict_with_name(const char* name)
   return d;
 }
 
-dict_t open_dict_with_tokens(const char* const buffer, const char* delimiters)
+cwdict_t cwdict_open_with_tokens
+(const char* const buffer, const char* delimiters)
 {
-  dict_t d = tokenize(buffer, delimiters);
+  cwdict_t d = tokenize(buffer, delimiters);
   d.name = NULL;
 
   return d;
 }
 
-dict_t open_dict_with_name_and_tokens(const char* name, const char* const buffer, const char* delimiters)
+cwdict_t cwdict_open_with_name_and_tokens
+(const char* name, const char* const buffer, const char* delimiters)
 {
-  dict_t d = tokenize(buffer, delimiters);
+  cwdict_t d = tokenize(buffer, delimiters);
   d.name = NULL;
 
   d.name = (char*)malloc((strlen(name) + 1) * sizeof(char));
@@ -201,44 +254,49 @@ dict_t open_dict_with_name_and_tokens(const char* name, const char* const buffer
   return d;
 }
 
-dict_t add_drow_to_dict(dict_t dict, drow_t drow)
+cwdict_t cwdict_add_row
+(cwdict_t dict, cwdrow_t drow)
 {
   ++dict.count;
 
-  dict.drows = (drow_t*)realloc(dict.drows, sizeof(drow_t) * dict.count);
+  dict.drows = (cwdrow_t*)realloc(dict.drows, sizeof(cwdrow_t) * dict.count);
   dict.drows[dict.count - 1] = drow;
 
   return dict;
 }
 
-dict_t add_drow_to_dict_strict(dict_t dict, drow_t drow, U32 size)
+cwdict_t cwdict_add_row_strict
+(cwdict_t dict, cwdrow_t drow, U32 size)
 {
-  if(drow.count >= size) dict = add_drow_to_dict(dict, drow);
+  if(drow.count >= size) dict = cwdict_add_row(dict, drow);
   return dict;
 }
 
 
-dict_t place_word_in_dict(dict_t dict, const char* word)
+cwdict_t cwdict_place_word
+(cwdict_t dict, const char* word)
 {
-  drow_t drow = open_drow();
+  cwdrow_t drow = cwdrow_open();
 
-  drow = add_word_to_drow(drow, word);
-  dict = add_drow_to_dict(dict, drow);
+  drow = cwdrow_add_word(drow, word);
+  dict = cwdict_add_row(dict, drow);
 
   return dict;
 }
 
-dict_t place_words_in_dict(dict_t dict, const char* const* words, U32 s)
+cwdict_t cwdict_place_words
+(cwdict_t dict, const char* const* words, U32 s)
 {
   for(U32 i = 0; i != s; ++i)
   {
-    dict = place_word_in_dict(dict, words[i]);
+    dict = cwdict_place_word(dict, words[i]);
   }
 
   return dict;
 }
 
-dict_t place_word_in_dict_strict(dict_t dict, const char* word)
+cwdict_t cwdict_place_word_strict
+(cwdict_t dict, const char* word)
 {
   bool inserted = false;
   U32 len = strlen(word);
@@ -247,35 +305,36 @@ dict_t place_word_in_dict_strict(dict_t dict, const char* word)
   {
     if(dict.drows[i].largest == len)
     {
-      dict.drows[i] = add_word_to_drow(dict.drows[i], word);
+      dict.drows[i] = cwdrow_add_word(dict.drows[i], word);
       inserted = true;
     }
   }
 
-  if(inserted == false) dict = place_word_in_dict(dict, word);
+  if(inserted == false) dict = cwdict_place_word(dict, word);
 
   return dict;
 }
 
-dict_t place_words_in_dict_strict(dict_t dict, const char* const* words, 
-U32 s)
+cwdict_t cwdict_place_words_strict
+(cwdict_t dict, const char* const* words, U32 s)
 {
   for(U32 i = 0; i != s; ++i)
   {
-    dict = place_word_in_dict_strict(dict, words[i]);
+    dict = cwdict_place_word_strict(dict, words[i]);
   }
 
   return dict;
 }
 
-dict_t bubble_dict(dict_t dict)
+cwdict_t cwdict_sort
+(cwdict_t dict)
 {
-  drow_t temp;
+  cwdrow_t temp;
 
   // sort individual drows' contents
   for(U32 i = 0; i != dict.count; ++i)
   {
-    dict.drows[i] = bubble_drow(dict.drows[i]);
+    dict.drows[i] = cwdrow_sort(dict.drows[i]);
   }
 
   // sort individual drows within dict
@@ -297,7 +356,8 @@ dict_t bubble_dict(dict_t dict)
   return dict;
 }
 
-dict_t prune_dict(dict_t dict, bool sorted)
+cwdict_t cwdict_prune
+(cwdict_t dict, bool sorted)
 {
   U32 len = 0, size = 0, null_count = 0;
   char* against = NULL;
@@ -322,7 +382,7 @@ dict_t prune_dict(dict_t dict, bool sorted)
   }
 
   // sort drows within dict
-  if(sorted) dict = bubble_dict(dict);
+  if(sorted) dict = cwdict_sort(dict);
 
   // resize individual drows within dict
   for(U32 i = 0; i != dict.count; ++i)
@@ -344,12 +404,13 @@ dict_t prune_dict(dict_t dict, bool sorted)
     }
   }
 
-  if(dict_any_blanks(dict)) dict = prune_dict(dict, sorted);
+  if(cwdict_blanks(dict)) dict = cwdict_prune(dict, sorted);
 
   return dict;
 }
 
-dict_t map_dict(dict_t dict, char* (*f)(char*))
+cwdict_t cwdict_map
+(cwdict_t dict, char* (*f)(char*))
 {
   U32 len = 0;
   char* temp = (char*)malloc(sizeof(char) * SMALL_BUFFER);
@@ -376,18 +437,19 @@ dict_t map_dict(dict_t dict, char* (*f)(char*))
   return dict;
 }
 
-dict_t deep_copy_dict(dict_t dict)
+cwdict_t cwdict_copy
+(cwdict_t dict)
 {
-  dict_t new;
+  cwdict_t new;
 
-  if(dict.name) new = open_dict_with_name(dict.name);
-  else new = open_dict();
+  if(dict.name) new = cwdict_open_with_name(dict.name);
+  else new = cwdict_open();
 
   for(U32 i = 0; i != dict.count; ++i)
   {
     for(U32 j = 0; j != dict.drows[i].count; ++j)
     {
-      new = place_word_in_dict_strict(new, dict.drows[i].words[j]);
+      new = cwdict_place_word_strict(new, dict.drows[i].words[j]);
     }
   }
 
@@ -398,12 +460,13 @@ dict_t deep_copy_dict(dict_t dict)
     new.name[strlen(dict.name)] = '\0';
   }
 
-  if(dict.sorted) new = bubble_dict(new);
+  if(dict.sorted) new = cwdict_sort(new);
 
   return new;
 }
 
-bool dict_exclude(dict_t dict, char const* str)
+bool cwdict_exclude
+(cwdict_t dict, char const* str)
 {
   for(U32 i = 0; i != dict.count; ++i)
   {
@@ -416,7 +479,8 @@ bool dict_exclude(dict_t dict, char const* str)
   return true;
 }
 
-bool dict_include(dict_t dict, char const* str)
+bool cwdict_include
+(cwdict_t dict, char const* str)
 {
   for(U32 i = 0; i != dict.count; ++i)
   {
@@ -429,20 +493,22 @@ bool dict_include(dict_t dict, char const* str)
   return false;
 }
 
-bool dict_any_blanks(dict_t dict)
+bool cwdict_blanks
+(cwdict_t dict)
 {
   for(U32 i = 0; i != dict.count; ++i)
   {
     for(U32 j = 0; j != dict.drows[i].count; ++j)
     {
-      if(drow_word_blank(dict.drows[i], j)) return true;
+      if(cwdrow_word_blank(dict.drows[i], j)) return true;
     }
   }
 
   return false;
 }
 
-bool dict_valid(dict_t dict, char** error)
+bool cwdict_valid
+(cwdict_t dict, char** error)
 {
   U32 count = 0;
 
@@ -455,27 +521,31 @@ bool dict_valid(dict_t dict, char** error)
     }
   }
   
-  if(count < MIN_DICT_SIZE)
+  if(error)
   {
-    *error = (char*)malloc(SMALL_BUFFER);
-    sprintf(*error, "too few acceptable entries (%d of %d)",count,
-    MIN_DICT_SIZE);
+    if(count < MIN_DICT_SIZE)
+    {
+      *error = (char*)malloc(SMALL_BUFFER);
+      sprintf(*error, "too few acceptable entries (%d of %d)",count,
+      MIN_DICT_SIZE);
 
-    return false;
-  }
-    
-  if(dict.sorted == false)
-  {
-    *error = (char*)malloc(SMALL_BUFFER);
-    sprintf(*error, "dictionary couldn't be sorted");
+      return false;
+    }
+      
+    if(dict.sorted == false)
+    {
+      *error = (char*)malloc(SMALL_BUFFER);
+      sprintf(*error, "dictionary couldn't be sorted");
 
-    return false;
+      return false;
+    }
   }
 
   return true;
 }
 
-bool dict_equal(dict_t dict, dict_t against)
+bool cwdict_equal
+(cwdict_t dict, cwdict_t against)
 {
   if(dict.count != against.count) return false;
 
@@ -493,7 +563,8 @@ bool dict_equal(dict_t dict, dict_t against)
   return true;
 }
 
-bool dict_not_equal(dict_t dict, dict_t against)
+bool cwdict_inequal
+(cwdict_t dict, cwdict_t against)
 {
   if(dict.count != against.count) return true;
 
@@ -511,10 +582,11 @@ bool dict_not_equal(dict_t dict, dict_t against)
   return false;
 }
 
-I32 find_drow_of_size_in_dict(dict_t dict, U32 largest)
+I32 cwdict_find_row_of_size
+(cwdict_t dict, U32 largest)
 {
   // sort dict if necessary
-  if(dict.sorted == false) dict = prune_dict(dict, true);
+  if(dict.sorted == false) dict = cwdict_prune(dict, true);
 
   for(U32 i = 0; i != dict.count; ++i)
   {
@@ -524,7 +596,8 @@ I32 find_drow_of_size_in_dict(dict_t dict, U32 largest)
   return -1;
 }
 
-U32 total_dict(dict_t dict)
+U32 cwdict_length
+(cwdict_t dict)
 {
   U32 total = 0;
 
@@ -533,7 +606,8 @@ U32 total_dict(dict_t dict)
   return total;
 }
 
-U32 dict_largest(dict_t dict)
+U32 cwdict_largest
+(cwdict_t dict)
 {
   U32 largest = 0;
 
@@ -546,7 +620,8 @@ U32 dict_largest(dict_t dict)
   return largest;
 }
 
-char* sample_dict(dict_t dict)
+char* cwdict_sample
+(cwdict_t dict)
 {
   // immediately fail if empty
   if(dict.count == 0) return NULL;
@@ -554,10 +629,11 @@ char* sample_dict(dict_t dict)
   U32 max = (dict.count == 1 ? 0 : dict.count - 1);
   U32 external = (max == 0 ? 0 : motherr(0, max));
 
-  return sample_drow(dict.drows[external]);
+  return cwdrow_sample(dict.drows[external]);
 }
 
-char* join_dict(dict_t dict, char const* delimiter)
+char* cwdict_join
+(cwdict_t dict, char const* delimiter)
 {
   U32 len = 0, del_len = strlen(delimiter);
   char* string = NULL; char* temp = NULL;
@@ -595,13 +671,26 @@ char* join_dict(dict_t dict, char const* delimiter)
   return string;
 }
 
-void puts_dict(dict_t dict)
+cwdict_t cwdict_close
+(cwdict_t dict)
+{
+  for(U32 i = 0; i != dict.count; ++i) cwdrow_close(dict.drows[i]);
+  if(dict.drows) { free(dict.drows); dict.drows = NULL; }
+
+  dict.count = 0;
+  if(dict.name) { free(dict.name); dict.name = NULL; }
+
+  return cwdict_open();
+}
+
+void puts_cwdict
+(cwdict_t dict)
 {
   fprintf(stdout, "[");
 
   for(U32 i = 0; i != dict.count; ++i)
   {
-    puts_drow(dict.drows[i]);
+    puts_cwdrow(dict.drows[i]);
 
     if(i < dict.count - 1) fprintf(stdout, ",");
 
@@ -613,18 +702,8 @@ void puts_dict(dict_t dict)
   fprintf(stdout, "]");
 }
 
-dict_t close_dict(dict_t dict)
-{
-  for(U32 i = 0; i != dict.count; ++i) close_drow(dict.drows[i]);
-  if(dict.drows) { free(dict.drows); dict.drows = NULL; }
-
-  dict.count = 0;
-  if(dict.name) { free(dict.name); dict.name = NULL; }
-
-  return open_dict();
-}
-
-void validate_dict(dict_t dict, char const* function_name)
+void validate_cwdict
+(cwdict_t dict, char const* function_name)
 {
   U32 count = 0;
 
@@ -656,11 +735,12 @@ void validate_dict(dict_t dict, char const* function_name)
   }
 }
 
-dict_t split(const char* buffer, const char* delimiters)
+cwdict_t split_into_cwdict
+(const char* buffer, const char* delimiters)
 {
   char* tok;
   char* mutable_buffer = (char*)malloc(strlen(buffer) + 1 * sizeof(char));
-  dict_t dict = open_dict();
+  cwdict_t dict = cwdict_open();
 
   // get mutable copy of buffer; a bit slower, but allows for const-ness
   strcpy(mutable_buffer, buffer);
@@ -671,7 +751,7 @@ dict_t split(const char* buffer, const char* delimiters)
   while(tok != NULL)
   {
     // add word to dict
-    dict = place_word_in_dict(dict, tok);
+    dict = cwdict_place_word(dict, tok);
 
     // get new tok (if any)
     tok = strtok(NULL, delimiters);
@@ -686,20 +766,20 @@ dict_t split(const char* buffer, const char* delimiters)
 #ifdef DICTMAIN
 int main(int argc, const char *argv[])
 {
-  dict_t dict = open_dict();
+  cwdict_t dict = cwdict_open();
   // const char * const words[]= { "the", "quick", "brown", "fox", "jumps", 
   // "over", "the", "lazy", "dog", "dawg" };
 
-  dict = place_words_in_dict_strict(dict, argv, argc);
-  dict = prune_dict(dict, true);
+  dict = cwdict_place_words_strict(dict, argv, argc);
+  dict = cwdict_prune(dict, true);
 
   #ifdef DEBUG
   fprintf(stdout, "dict.count : %d\n", dict.count);
   #endif
 
-  puts_dict(dict); fprintf(stdout, "\n");
+  puts_cwdict(dict); fprintf(stdout, "\n");
 
-  close_dict(dict);
+  cwdict_close(dict);
 
   return 0;
 }

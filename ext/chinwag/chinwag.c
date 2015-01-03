@@ -1,6 +1,7 @@
 #include "chinwag.h"
 
-char* chinwag(cw_t type, unsigned long min, unsigned long max, dict_t dict)
+char* chinwag
+(cw_t type, unsigned long min, unsigned long max, cwdict_t dict)
 {
   char* result = NULL;
 
@@ -27,17 +28,18 @@ char* chinwag(cw_t type, unsigned long min, unsigned long max, dict_t dict)
     exit(EXIT_FAILURE);
   }
 
-  if(type == CW_LETTERS) result = ltr_rng(min, max, dict);
-  else if(type == CW_WORDS) result = wrd_rng(min, max, dict);
-  else if(type == CW_SENTENCES) result = snt_rng(min, max, dict);
-  else if(type == CW_PARAGRAPHS) result = pgf_rng(min, max, dict);
+  if(type == CW_LETTERS) result = cw_ltr_rng(min, max, dict);
+  else if(type == CW_WORDS) result = cw_wrd_rng(min, max, dict);
+  else if(type == CW_SENTENCES) result = cw_snt_rng(min, max, dict);
+  else if(type == CW_PARAGRAPHS) result = cw_pgf_rng(min, max, dict);
 
   return result;
 }
 
-char* ltr_rng(unsigned long min, unsigned long max, dict_t dict)
+char* cw_ltr_rng
+(unsigned long min, unsigned long max, cwdict_t dict)
 {
-  dict_t temp = open_dict();
+  cwdict_t temp = cwdict_open();
   I32 amount = motherr(min,max), total = 0; U32 len = 0;
   char* s = (char*)malloc(SMALL_BUFFER); char* sample = NULL; 
   char* result = NULL; char* vowels = "aeiou";
@@ -54,7 +56,7 @@ char* ltr_rng(unsigned long min, unsigned long max, dict_t dict)
     }
     else
     {
-      s = strcpy(s, sample_dict(dict));
+      s = strcpy(s, cwdict_sample(dict));
       len = strlen(s); total += len; s[len] = '\0';
       if(len > amount || include(s, " ") || include(s, "-")) continue;
     }
@@ -90,25 +92,26 @@ char* ltr_rng(unsigned long min, unsigned long max, dict_t dict)
       amount -= 2;
     }
 
-    temp = place_word_in_dict(temp, s);
+    temp = cwdict_place_word(temp, s);
     if(amount > 0 && amount != 1) --amount;
   }
 
   // post-process dict (pass utility::capitalize function as parameter)
-  temp = prune_dict(temp, false);
-  temp = map_dict(temp, capitalize);
-  result = join_dict(temp, " ");
+  temp = cwdict_prune(temp, false);
+  temp = cwdict_map(temp, capitalize);
+  result = cwdict_join(temp, " ");
 
-  close_dict(temp);
+  cwdict_close(temp);
   free(s); s = NULL;
 
   return result;
 }
 
-char* wrd_rng(unsigned long min, unsigned long max, dict_t dict)
+char* cw_wrd_rng
+(unsigned long min, unsigned long max, cwdict_t dict)
 {
-  dict_t temp = open_dict();
-  U32 amount = motherr(min, max), total = total_dict(dict);
+  cwdict_t temp = cwdict_open();
+  U32 amount = motherr(min, max), total = cwdict_length(dict);
   char* sample = NULL; char* result = NULL;
   bool invalid = true;
 
@@ -117,32 +120,33 @@ char* wrd_rng(unsigned long min, unsigned long max, dict_t dict)
   {
     while(invalid)
     {
-      sample = sample_dict(dict);
+      sample = cwdict_sample(dict);
 
       // valid if no space, hyphen, or duplicate (latter depends on size)
       if(exclude(sample, " ") && exclude(sample, "-"))
       {
         if(amount > total) invalid = false;
-        else if(dict_exclude(temp, sample)) invalid = false;
+        else if(cwdict_exclude(temp, sample)) invalid = false;
       }
     }
     
-    temp = place_word_in_dict(temp, sample);
+    temp = cwdict_place_word(temp, sample);
     invalid = true;
   }
 
   // post-process dict (pass utility::capitalize function as parameter)
-  temp = map_dict(temp, capitalize);
-  result = join_dict(temp, " ");
+  temp = cwdict_map(temp, capitalize);
+  result = cwdict_join(temp, " ");
 
-  close_dict(temp);
+  cwdict_close(temp);
 
   return result;
 }
 
-char* snt_rng(unsigned long min, unsigned long max, dict_t dict)
+char* cw_snt_rng
+(unsigned long min, unsigned long max, cwdict_t dict)
 {
-  dict_t master = open_dict(), temp; drow_t selected;
+  cwdict_t master = cwdict_open(), temp; cwdrow_t selected;
   U32 word_amount = 0, last = 0, amount = motherr(min, max), now = 0, 
   len = 0, t_minus = 0; U8 comma = 0; I32 punct = 0;
   U32* no_dice = (U32*)malloc(sizeof(U32) * SMALL_BUFFER);
@@ -151,7 +155,7 @@ char* snt_rng(unsigned long min, unsigned long max, dict_t dict)
 
   for(U32 i = 0; i != amount; ++i)
   {
-    temp = open_dict();
+    temp = cwdict_open();
     word_amount = motherr(SENTENCE_MIN_WORD_LENGTH, 
     SENTENCE_MAX_WORD_LENGTH);
 
@@ -170,10 +174,10 @@ char* snt_rng(unsigned long min, unsigned long max, dict_t dict)
       else if(last > 10 || last <= 2) { now = motherr(6, 10); t_minus = 3; }
 
       selected = dict.drows[now];
-      sample = sample_drow(selected);
+      sample = cwdrow_sample(selected);
 
-      while(dict_include(temp, sample) && strlen(sample) != now)
-      { sample = sample_dict(dict); }
+      while(cwdict_include(temp, sample) && strlen(sample) != now)
+      { sample = cwdict_sample(dict); }
 
       // add comma (if applicable)
       if(comma && j == comma - 1)
@@ -186,18 +190,18 @@ char* snt_rng(unsigned long min, unsigned long max, dict_t dict)
         s[len] = '\0';
 
         s = add_suffix(s, ",");
-        temp = place_word_in_dict(temp, s);
+        temp = cwdict_place_word(temp, s);
 
         free(s);
       }
-      else temp = place_word_in_dict(temp, sample);
+      else temp = cwdict_place_word(temp, sample);
 
       invalid = true;
       last = now;
     }
 
     // join temporary dict into a sentence; capitalize first word
-    s = join_dict(temp, " ");
+    s = cwdict_join(temp, " ");
     s = capitalize(s);
 
     // determine punctuation; 1 - period, 2 - question, 3 - exclamation
@@ -209,38 +213,39 @@ char* snt_rng(unsigned long min, unsigned long max, dict_t dict)
     else if(punct >= 85 && punct <= 99) s = add_suffix(s, "!");
 
     // add sentence to master dict and cleanup
-    master = place_word_in_dict(master, s);
+    master = cwdict_place_word(master, s);
 
-    close_dict(temp);
+    cwdict_close(temp);
     free(s);
   }
 
-  result = join_dict(master, " ");
-  close_dict(master);
+  result = cwdict_join(master, " ");
+  cwdict_close(master);
   free(no_dice);
 
   return result;
 }
 
-char* pgf_rng(unsigned long min, unsigned long max, dict_t dict)
+char* cw_pgf_rng
+(unsigned long min, unsigned long max, cwdict_t dict)
 {
   char* result = NULL; char* sentences = NULL;
   U32 amount = motherr(min, max), sentence_amount = 0;
-  dict_t master = open_dict();
+  cwdict_t master = cwdict_open();
 
   for(U32 i = 0; i != amount; ++i)
   {
     sentence_amount = motherr(PARAGRAPH_MIN_SENTENCE_LENGTH, 
     PARAGRAPH_MAX_SENTENCE_LENGTH);
 
-    sentences = snt(sentence_amount, dict);
-    master = place_word_in_dict(master, sentences);
+    sentences = cw_snt(sentence_amount, dict);
+    master = cwdict_place_word(master, sentences);
 
     free(sentences);
   }
 
-  result = join_dict(master, "\n\n");
-  close_dict(master);
+  result = cwdict_join(master, "\n\n");
+  cwdict_close(master);
 
   return result;
 }
