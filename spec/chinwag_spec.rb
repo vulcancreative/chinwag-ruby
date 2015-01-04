@@ -67,6 +67,24 @@ describe Chinwag::CWDict do
     expect(@seuss_dict.size).to eq(1096)
   end
 
+  it "can be enumerated over" do
+    @seuss_dict.each { |e| expect(@seuss_dict.include?(e)).to be true }
+  end
+
+  it "can be mapped" do
+    @seuss_xxx = @seuss_dict.map { |e| "xxx#{e}xxx" }
+    @seuss_cap = @seuss_dict.map { |e| e.upcase }
+
+    expect(@seuss_dict.count).to eq @seuss_xxx.count
+    expect(@seuss_dict.count).to eq @seuss_cap.count
+
+    @seuss_xxx.each { |e| expect(@seuss_dict.exclude?(e)).to be true }
+
+    @seuss_dict.map! { |e| e.upcase }
+    expect(@seuss_dict.count).to eq @seuss_cap.count
+    @seuss_dict.each { |e| expect(@seuss_cap.include?(e)).to be true }
+  end
+
   it "joins dictionary items by a connecting string (default: space)" do
     dir = File.dirname(__FILE__)
 

@@ -377,6 +377,11 @@ VALUE c_cwdict_length(VALUE obj)
   return LONG2NUM(cwdict_length(*d));
 }
 
+VALUE c_cwdict_enum_length(VALUE obj, VALUE args, VALUE eobj)
+{
+  return c_cwdict_length(obj);
+}
+
 VALUE c_cwdict_join(int argc, VALUE* argv, VALUE obj)
 {
   cwdict_t* d;
@@ -419,6 +424,81 @@ VALUE c_cwdict_sample(VALUE obj)
   Data_Get_Struct(obj, cwdict_t, d);
 
   return rb_str_new2(cwdict_sample(*d));
+}
+
+VALUE c_cwdict_each(VALUE obj)
+{
+  cwdict_t *d;
+
+  // get original pointers from Ruby VM
+  Data_Get_Struct(obj, cwdict_t, d);
+
+  RETURN_SIZED_ENUMERATOR(obj, 0, 0, c_cwdict_enum_length);
+
+  for(U32 i = 0; i != d->count; ++i)
+  {
+    for(U32 j = 0; j != d->drows[i].count; ++j)
+    {
+      rb_yield(rb_str_new2(d->drows[i].words[j]));
+    }
+  }
+
+  return obj;
+}
+
+VALUE c_cwdict_each_index(VALUE obj)
+{
+  long num = 0; cwdict_t *d;
+
+  // get original pointers from Ruby VM
+  Data_Get_Struct(obj, cwdict_t, d);
+
+  RETURN_SIZED_ENUMERATOR(obj, 0, 0, c_cwdict_enum_length);
+
+  for(U32 i = 0; i != d->count; ++i)
+  {
+    for(U32 j = 0; j != d->drows[i].count; ++j)
+    {
+      rb_yield(LONG2NUM(++num));
+    }
+  }
+
+  return obj;
+}
+
+VALUE c_cwdict_map_s(VALUE obj);
+VALUE c_cwdict_map(VALUE obj)
+{
+  VALUE new;
+
+  // get a new copy of the original dict
+  new = c_cwdict_clone(obj);
+  new = c_cwdict_map_s(new);
+
+  return new;
+}
+
+VALUE c_cwdict_map_s(VALUE obj)
+{
+  cwdict_t *d;
+
+  // get original pointers from Ruby VM
+  Data_Get_Struct(obj, cwdict_t, d);
+
+  for(U32 i = 0; i != d->count; ++i)
+  {
+    for(U32 j = 0; j != d->drows[i].count; ++j)
+    {
+      VALUE ref = rb_yield(rb_str_new2(d->drows[i].words[j]));
+      long len = RSTRING_LEN(ref);
+
+      d->drows[i].words[j] = (char*)realloc(d->drows[i].words[j], len + 1);
+      strcpy(d->drows[i].words[j], StringValueCStr(ref));
+      d->drows[i].words[j][len] = '\0';
+    }
+  }
+
+  return obj;
 }
 
 VALUE c_cwdict_sort(VALUE obj)
@@ -752,6 +832,9 @@ void Init_chinwag()
   m_chinwag = rb_define_module("Chinwag");
   c_cwdict = rb_define_class_under(m_chinwag, "CWDict", rb_cObject);
 
+  // note module inclusions
+  rb_include_module(c_cwdict, rb_mEnumerable);
+
   // sync up module generation functions
   rb_define_module_function(m_chinwag, "generate", m_cw_generate, -1);
   rb_define_module_function(m_chinwag, "set_default_dict", m_set_d_dict, 1);
@@ -770,6 +853,11 @@ void Init_chinwag()
   rb_define_method(c_cwdict, "join", c_cwdict_join, -1);
   rb_define_method(c_cwdict, "clone", c_cwdict_clone, 0);
   rb_define_method(c_cwdict, "sample", c_cwdict_sample, 0);
+
+  rb_define_method(c_cwdict, "each", c_cwdict_each, 0);
+  rb_define_method(c_cwdict, "each_index", c_cwdict_each_index, 0);
+  rb_define_method(c_cwdict, "map", c_cwdict_map, 0);
+  rb_define_method(c_cwdict, "map!", c_cwdict_map_s, 0);
 
   rb_define_method(c_cwdict, "sort", c_cwdict_sort, 0);
   rb_define_method(c_cwdict, "prune", c_cwdict_prune, 0);
