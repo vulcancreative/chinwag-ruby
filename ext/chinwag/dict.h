@@ -43,10 +43,16 @@ cwdict_t cwdict_sort
 cwdict_t cwdict_prune
 (cwdict_t dict, bool sorted);
 
+cwdict_t cwdict_clean // aliases cwdict_prune(dict, true)
+(cwdict_t dict);
+
 cwdict_t cwdict_map
 (cwdict_t dict, char* (*f)(char*));
 
-cwdict_t cwdict_copy
+cwdict_t cwdict_clone
+(cwdict_t dict);
+
+cwdict_t cwdict_dup // aliases cwdict_clone
 (cwdict_t dict);
 
 bool cwdict_exclude
@@ -65,6 +71,12 @@ bool cwdict_inequal
 (cwdict_t dict, cwdict_t against);
 
 U32 cwdict_length
+(cwdict_t dict);
+
+U32 cwdict_size // aliases cwdict_length
+(cwdict_t dict);
+
+U32 cwdict_count // aliases cwdict_length
 (cwdict_t dict);
 
 U32 cwdict_largest

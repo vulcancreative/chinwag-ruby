@@ -406,7 +406,7 @@ VALUE c_cwdict_clone(VALUE obj)
   Data_Get_Struct(new, cwdict_t, new_p);
 
   // get a copy of the original dictionary
-  *new_p = cwdict_copy(*d);
+  *new_p = cwdict_clone(*d);
 
   return new;
 }

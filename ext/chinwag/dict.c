@@ -409,6 +409,12 @@ cwdict_t cwdict_prune
   return dict;
 }
 
+cwdict_t cwdict_clean
+(cwdict_t dict)
+{
+  return cwdict_prune(dict, true);
+}
+
 cwdict_t cwdict_map
 (cwdict_t dict, char* (*f)(char*))
 {
@@ -437,7 +443,7 @@ cwdict_t cwdict_map
   return dict;
 }
 
-cwdict_t cwdict_copy
+cwdict_t cwdict_clone
 (cwdict_t dict)
 {
   cwdict_t new;
@@ -463,6 +469,12 @@ cwdict_t cwdict_copy
   if(dict.sorted) new = cwdict_sort(new);
 
   return new;
+}
+
+cwdict_t cwdict_dup
+(cwdict_t dict)
+{
+  return cwdict_clone(dict);
 }
 
 bool cwdict_exclude
@@ -604,6 +616,18 @@ U32 cwdict_length
   for(U32 i = 0; i != dict.count; ++i) total += dict.drows[i].count;
 
   return total;
+}
+
+U32 cwdict_size
+(cwdict_t dict)
+{
+  return cwdict_length(dict);
+}
+
+U32 cwdict_count
+(cwdict_t dict)
+{
+  return cwdict_length(dict);
 }
 
 U32 cwdict_largest
