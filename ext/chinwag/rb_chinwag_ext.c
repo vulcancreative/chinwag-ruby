@@ -433,7 +433,11 @@ VALUE c_cwdict_each(VALUE obj)
   // get original pointers from Ruby VM
   Data_Get_Struct(obj, cwdict_t, d);
 
+  #ifdef RETURN_SIZE_ENUMERATOR
   RETURN_SIZED_ENUMERATOR(obj, 0, 0, c_cwdict_enum_length);
+  #else
+  RETURN_ENUMERATOR(obj, 0, 0);
+  #endif
 
   for(U32 i = 0; i != d->count; ++i)
   {
@@ -453,7 +457,11 @@ VALUE c_cwdict_each_index(VALUE obj)
   // get original pointers from Ruby VM
   Data_Get_Struct(obj, cwdict_t, d);
 
+  #ifdef RETURN_SIZE_ENUMERATOR
   RETURN_SIZED_ENUMERATOR(obj, 0, 0, c_cwdict_enum_length);
+  #else
+  RETURN_ENUMERATOR(obj, 0, 0);
+  #endif
 
   for(U32 i = 0; i != d->count; ++i)
   {
