@@ -29,6 +29,18 @@ enum {
 };
 typedef unsigned long cw_t;
 
+// error types
+enum {
+  CWERROR_INVALID_OUTPUT_TYPE   =   0,
+  CWERROR_MIN_LESS_THAN_ONE     =   1,
+  CWERROR_MAX_LESS_THAN_MIN     =   2,
+  CWERROR_MAX_TOO_HIGH          =   3,
+  CWERROR_DICT_TOO_SMALL        =   4,
+  CWERROR_DICT_UNSORTABLE       =   5,
+  CWERROR_DICT_UNKNOWN          =   6,
+};
+typedef unsigned long cwerror_t;
+
 // internal dictionary row
 typedef struct dictionary_type {
   bool sorted;
@@ -54,26 +66,28 @@ typedef struct dictionary_container_type {
 #include "tokenize.h"
 #include "utility.h"
 #include "config.h"
+#include "error.h"
 #include "dict.h"
+#include "args.h"
 
 char* chinwag
-(cw_t type, unsigned long min, unsigned long max, cwdict_t dict);
+(cw_t type, unsigned long min, unsigned long max, cwdict_t dict, cwerror_t* e);
 
 char* cw_ltr_rng
-(unsigned long min, unsigned long max, cwdict_t dict);
+(unsigned long min, unsigned long max, cwdict_t dict, cwerror_t* e);
 
 char* cw_wrd_rng
-(unsigned long min, unsigned long max, cwdict_t dict);
+(unsigned long min, unsigned long max, cwdict_t dict, cwerror_t* e);
 
 char* cw_snt_rng
-(unsigned long min, unsigned long max, cwdict_t dict);
+(unsigned long min, unsigned long max, cwdict_t dict, cwerror_t* e);
 
 char* cw_pgf_rng
-(unsigned long min, unsigned long max, cwdict_t dict);
+(unsigned long min, unsigned long max, cwdict_t dict, cwerror_t* e);
 
-#define cw_ltr(amt, dict) cw_ltr_rng(amt, amt, dict)
-#define cw_wrd(amt, dict) cw_wrd_rng(amt, amt, dict)
-#define cw_snt(amt, dict) cw_snt_rng(amt, amt, dict)
-#define cw_pgf(amt, dict) cw_pgf_rng(amt, amt, dict)
+#define cw_ltr(amt, dict, err) cw_ltr_rng(amt, amt, dict, err)
+#define cw_wrd(amt, dict, err) cw_wrd_rng(amt, amt, dict, err)
+#define cw_snt(amt, dict, err) cw_snt_rng(amt, amt, dict, err)
+#define cw_pgf(amt, dict, err) cw_pgf_rng(amt, amt, dict, err)
 
 #endif

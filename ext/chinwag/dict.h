@@ -62,7 +62,7 @@ bool cwdict_include
 (cwdict_t dict, char const* str);
 
 bool cwdict_valid
-(cwdict_t dict, char** error);
+(cwdict_t dict, cwerror_t* error);
 
 bool cwdict_equal
 (cwdict_t dict, cwdict_t against);

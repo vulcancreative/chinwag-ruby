@@ -1,18 +1,25 @@
+args.o: args.c args.h chinwag.h seuss.h latin.h ingredient.h generator.h \
+  tokenize.h utility.h config.h error.h dict.h
 chinwag.o: chinwag.c chinwag.h seuss.h latin.h ingredient.h generator.h \
-  tokenize.h utility.h config.h dict.h
+  tokenize.h utility.h config.h error.h dict.h args.h
 config.o: config.c config.h chinwag.h seuss.h latin.h ingredient.h \
-  generator.h tokenize.h utility.h dict.h
+  generator.h tokenize.h utility.h error.h dict.h args.h
 dict.o: dict.c dict.h chinwag.h seuss.h latin.h ingredient.h generator.h \
-  tokenize.h utility.h config.h
+  tokenize.h utility.h config.h error.h args.h
+error.o: error.c error.h chinwag.h seuss.h latin.h ingredient.h \
+  generator.h tokenize.h utility.h config.h dict.h args.h
 generator.o: generator.c generator.h chinwag.h seuss.h latin.h \
-  ingredient.h tokenize.h utility.h config.h dict.h
+  ingredient.h tokenize.h utility.h config.h error.h dict.h args.h
 latin.o: latin.c latin.h chinwag.h seuss.h ingredient.h generator.h \
-  tokenize.h utility.h config.h dict.h
+  tokenize.h utility.h config.h error.h dict.h args.h
 rb_chinwag_ext.o: rb_chinwag_ext.c rb_chinwag_ext.h chinwag.h seuss.h \
-  latin.h ingredient.h generator.h tokenize.h utility.h config.h dict.h
+  latin.h ingredient.h generator.h tokenize.h utility.h config.h error.h \
+  dict.h args.h
+rep.o: rep.c chinwag.h seuss.h latin.h ingredient.h generator.h \
+  tokenize.h utility.h config.h error.h dict.h args.h
 seuss.o: seuss.c seuss.h chinwag.h latin.h ingredient.h generator.h \
-  tokenize.h utility.h config.h dict.h
+  tokenize.h utility.h config.h error.h dict.h args.h
 tokenize.o: tokenize.c tokenize.h chinwag.h seuss.h latin.h ingredient.h \
-  generator.h utility.h config.h dict.h
+  generator.h utility.h config.h error.h dict.h args.h
 utility.o: utility.c utility.h chinwag.h seuss.h latin.h ingredient.h \
-  generator.h tokenize.h config.h dict.h
+  generator.h tokenize.h config.h error.h dict.h args.h

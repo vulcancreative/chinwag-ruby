@@ -1,28 +1,24 @@
 #include "config.h"
 
-const unsigned MAJOR_VERSION = 1;
-const unsigned MINOR_VERSION = 2;
-const unsigned PATCH_VERSION = 1;
+const char* const CW_VERSION = "1.2.3";
+const char* const CW_DATE_YEAR = "2015";
+const char* const CW_DATE_MONTH = "01";
+const char* const CW_DATE_DAY = "11";
+const char* const CW_REVISION = "1";
 
-const char* const DATE_YEAR = "2015";
-const char* const DATE_MONTH = "01";
-const char* const DATE_DAY = "03";
-const char* const REVISION = "921";
+const unsigned CW_SMALL_BUFFER = 1024;
+const unsigned CW_LARGE_BUFFER = 5120;
 
-const unsigned SMALL_BUFFER = 1024;
-const unsigned LARGE_BUFFER = 5120;
+const unsigned CW_MIN_DICT_SIZE = 300;
 
-const unsigned MIN_DICT_SIZE = 300;
+const char* const CW_DELIMITERS = "\r\n,;:\034";
 
-const char* const DELIMITERS = "\r\n,;:\034";
+const unsigned CW_SENTENCE_MIN_WORD = 2;
+const unsigned CW_SENTENCE_MAX_WORD = 25;
 
-const unsigned CW_DEFAULT = 1; // == WORDS
+const unsigned CW_PARAGRAPH_MIN_SENTENCE = 4;
+const unsigned CW_PARAGRAPH_MAX_SENTENCE = 6;
 
-const unsigned DEFAULT_MIN_OUTPUT_LENGTH = 1;
-const unsigned DEFAULT_MAX_OUTPUT_LENGTH = 5;
-
-const unsigned SENTENCE_MIN_WORD_LENGTH = 2;
-const unsigned SENTENCE_MAX_WORD_LENGTH = 25;
-
-const unsigned PARAGRAPH_MIN_SENTENCE_LENGTH = 4;
-const unsigned PARAGRAPH_MAX_SENTENCE_LENGTH = 6;
+unsigned CW_DEFAULT_TYPE = 1; // == WORDS
+unsigned CW_DEFAULT_MIN_OUTPUT = 1;
+unsigned CW_DEFAULT_MAX_OUTPUT = 5;

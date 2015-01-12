@@ -62,9 +62,10 @@ describe Chinwag::CWDict do
     expect(@seuss_dict.name).to eq("some other name")
   end
 
-  it "discloses its length/size" do
+  it "discloses its length/size/count" do
     expect(@seuss_dict.length).to eq(1096)
     expect(@seuss_dict.size).to eq(1096)
+    expect(@seuss_dict.count).to eq(1096)
   end
 
   it "can be enumerated over" do
@@ -214,7 +215,7 @@ describe Chinwag::CWDict do
     end
 
     expect(@small_mess.length).to be > 300
-    expect { @small_mess.valid? }.to raise_error(/couldn't be sorted/)
+    expect { @small_mess.valid? }.to raise_error(/unable to sort dict/)
   end
 
   it "should be able to determine whether it has an entry or not" do
@@ -251,7 +252,7 @@ describe Chinwag::CWDict do
     expect(@seuss_dict.include? "oqrstuv").to be true
 
     @small_mess = Chinwag::CWDict.open
-    
+
     expect(@small_mess.to_s).to eq("[]")
 
     @small_mess += %w[this is a quick test]
@@ -263,7 +264,7 @@ describe Chinwag::CWDict do
     expect(@small_mess.include? "test").to be true
 
     @small_mess + %w[of appending strings]
-    
+
     expect(@small_mess.include? "of").to be false
     expect(@small_mess.include? "appending").to be false
     expect(@small_mess.include? "strings").to be false

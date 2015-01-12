@@ -20,4 +20,12 @@
 extern VALUE m_chinwag;
 extern VALUE c_cw_dict;
 
+extern VALUE e_invalid_output_type;
+extern VALUE e_min_less_than_one;
+extern VALUE e_max_less_than_min;
+extern VALUE e_max_too_high;
+extern VALUE e_dict_too_small;
+extern VALUE e_dict_unsortable;
+extern VALUE e_dict_unknown;
+
 #endif

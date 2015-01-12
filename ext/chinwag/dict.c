@@ -419,7 +419,7 @@ cwdict_t cwdict_map
 (cwdict_t dict, char* (*f)(char*))
 {
   U32 len = 0;
-  char* temp = (char*)malloc(sizeof(char) * SMALL_BUFFER);
+  char* temp = (char*)malloc(sizeof(char) * CW_SMALL_BUFFER);
 
   for(U32 i = 0; i != dict.count; ++i)
   {
@@ -520,7 +520,7 @@ bool cwdict_blanks
 }
 
 bool cwdict_valid
-(cwdict_t dict, char** error)
+(cwdict_t dict, cwerror_t* error)
 {
   U32 count = 0;
 
@@ -532,25 +532,16 @@ bool cwdict_valid
       if(exclude(dict.drows[i].words[j], " ")) ++count;
     }
   }
-  
-  if(error)
+
+  if(count < CW_MIN_DICT_SIZE)
   {
-    if(count < MIN_DICT_SIZE)
-    {
-      *error = (char*)malloc(SMALL_BUFFER);
-      sprintf(*error, "too few acceptable entries (%d of %d)",count,
-      MIN_DICT_SIZE);
-
-      return false;
-    }
-      
-    if(dict.sorted == false)
-    {
-      *error = (char*)malloc(SMALL_BUFFER);
-      sprintf(*error, "dictionary couldn't be sorted");
-
-      return false;
-    }
+    *error = CWERROR_DICT_TOO_SMALL;
+    return false;
+  }
+  else if(dict.sorted == false)
+  {
+    *error = CWERROR_DICT_UNSORTABLE;
+    return false;
   }
 
   return true;
@@ -739,13 +730,13 @@ void validate_cwdict
       if(exclude(dict.drows[i].words[j], " ")) ++count;
     }
   }
-  
-  if(count < MIN_DICT_SIZE)
+
+  if(count < CW_MIN_DICT_SIZE)
   {
     char e[] =
     "Error in function \"%s\" :\n"
     "  valid dictionary (%d) entry count must be greater than %d\n";
-    fprintf(stderr, e, function_name, count, MIN_DICT_SIZE);
+    fprintf(stderr, e, function_name, count, CW_MIN_DICT_SIZE);
     exit(EXIT_FAILURE);
   }
 
@@ -791,7 +782,7 @@ cwdict_t split_into_cwdict
 int main(int argc, const char *argv[])
 {
   cwdict_t dict = cwdict_open();
-  // const char * const words[]= { "the", "quick", "brown", "fox", "jumps", 
+  // const char * const words[]= { "the", "quick", "brown", "fox", "jumps",
   // "over", "the", "lazy", "dog", "dawg" };
 
   dict = cwdict_place_words_strict(dict, argv, argc);

@@ -3,6 +3,14 @@
 VALUE m_chinwag;
 VALUE c_cwdict;
 
+VALUE e_invalid_output_type;
+VALUE e_min_less_than_one;
+VALUE e_max_less_than_min;
+VALUE e_max_too_high;
+VALUE e_dict_too_small;
+VALUE e_dict_unsortable;
+VALUE e_dict_unknown;
+
 VALUE default_dict;
 VALUE default_output_type;
 VALUE default_min_output;
@@ -10,7 +18,7 @@ VALUE default_max_output;
 
 cw_t get_cw_t_for_symbol(VALUE symbol)
 {
-  cw_t cw_type = CW_DEFAULT;
+  cw_t cw_type = CW_DEFAULT_TYPE;
 
   Check_Type(symbol, T_SYMBOL);
 
@@ -32,11 +40,12 @@ cw_t get_cw_t_for_symbol(VALUE symbol)
 VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
 {
   cwdict_t* d;
+  cwerror_t e;
   VALUE result;
   cw_t cw_type = get_cw_t_for_symbol(default_output_type);
   long min = NUM2LONG(default_min_output);
   long max = NUM2LONG(default_max_output);
-  char* output, *e;
+  char* output;
 
   // raise exception if passed wrong number of arguments
   if(argc > 4)
@@ -48,7 +57,7 @@ VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
   if(argc == 0) Data_Get_Struct(default_dict, cwdict_t, d);
 
   if(argc >= 1) Data_Get_Struct(argv[0], cwdict_t, d);
-  
+
   if(argc >= 2) cw_type = get_cw_t_for_symbol(argv[1]);
 
   if(argc >= 3)
@@ -64,6 +73,7 @@ VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
     max = FIX2LONG(argv[3]);
   }
 
+  /*
   if(max < min)
   {
     rb_raise(rb_eException,"upper threshold must be more than lower "
@@ -74,13 +84,22 @@ VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
   {
     rb_raise(rb_eRangeError,"out of range (1..10000)");
   }
+  */
 
   if(!cwdict_valid(*d, &e))
   {
-    rb_raise(rb_eException, "%s", e);
-    free(e);
+    char* message = cwerror_string(*d, e);
+    if(e == CWERROR_DICT_TOO_SMALL)
+    rb_raise(e_dict_too_small, "%s", message);
+    else if(e == CWERROR_DICT_UNSORTABLE)
+    rb_raise(e_dict_unsortable, "%s", message);
+    else
+    rb_raise(e_dict_unknown, "%s", message);
+
+    free(message);
   }
 
+  /*
   switch(cw_type)
   {
     case CW_LETTERS:
@@ -100,9 +119,34 @@ VALUE m_cw_generate(int argc, VALUE* argv, VALUE obj)
       "SENTENCES, or PARAGRAPHS)");
       break;
   }
+  */
 
-  result = rb_str_new2(output);
-  // free(output);
+  /*
+  CWERROR_INVALID_OUTPUT_TYPE   =   0,
+  CWERROR_MIN_LESS_THAN_ONE     =   1,
+  CWERROR_MAX_LESS_THAN_MIN     =   2,
+  CWERROR_MAX_TOO_HIGH          =   3,
+  */
+
+  output = chinwag(cw_type, min, max, *d, &e);
+
+  if(output) result = rb_str_new2(output);
+  else
+  {
+    char* message = cwerror_string(*d, e);
+    if(e == CWERROR_INVALID_OUTPUT_TYPE)
+    rb_raise(e_invalid_output_type, "%s", message);
+    else if(e == CWERROR_MIN_LESS_THAN_ONE)
+    rb_raise(e_min_less_than_one, "%s", message);
+    else if(e == CWERROR_MAX_LESS_THAN_MIN)
+    rb_raise(e_max_less_than_min, "%s", message);
+    else if(e == CWERROR_MAX_TOO_HIGH)
+    rb_raise(e_max_too_high, "%s", message);
+    else
+    rb_raise(e_dict_unknown, "%s", message);
+
+    free(message);
+  }
 
   return result;
 }
@@ -207,7 +251,7 @@ VALUE c_cwdict_open(int argc, VALUE* argv, VALUE obj)
   long last_drow = 0, last_word = 0; size_t len = 0;
 
   // raise exception if passed wrong number of arguments
-  if(argc > 2) 
+  if(argc > 2)
   rb_raise(rb_eArgError, "wrong number of arguments (expected 0..2)");
 
   if(argc == 1)
@@ -288,16 +332,16 @@ VALUE c_cwdict_open(int argc, VALUE* argv, VALUE obj)
     if(strcmp(tkns_ptr, "seussian") == 0)
     {
       if(!name_ptr)
-      d=cwdict_open_with_name_and_tokens("seussian",dict_seuss,DELIMITERS);
+      d=cwdict_open_with_name_and_tokens("seussian",dict_seuss,CW_DELIMITERS);
       else
-      d=cwdict_open_with_name_and_tokens(name_ptr,dict_seuss,DELIMITERS);
+      d=cwdict_open_with_name_and_tokens(name_ptr,dict_seuss,CW_DELIMITERS);
     }
     else if(strcmp(tkns_ptr, "latin") == 0)
     {
       if(!name_ptr)
-      d=cwdict_open_with_name_and_tokens("latin", dict_latin,DELIMITERS);
+      d=cwdict_open_with_name_and_tokens("latin", dict_latin,CW_DELIMITERS);
       else
-      d=cwdict_open_with_name_and_tokens(name_ptr, dict_latin,DELIMITERS);
+      d=cwdict_open_with_name_and_tokens(name_ptr, dict_latin,CW_DELIMITERS);
     }
   }
   // ...else, if just a name was passed...
@@ -308,11 +352,11 @@ VALUE c_cwdict_open(int argc, VALUE* argv, VALUE obj)
     U32 stringify_result = stringify_file(&file_buffer, file_ptr);
     if(stringify_result == 0)
     {
-      rb_raise(rb_eException, "unable to process passed file (%s)", 
+      rb_raise(rb_eException, "unable to process passed file (%s)",
       file_name);
     }
 
-    d=cwdict_open_with_name_and_tokens(name, file_buffer, DELIMITERS);
+    d=cwdict_open_with_name_and_tokens(name, file_buffer, CW_DELIMITERS);
 
     free(file_buffer);
   }
@@ -337,7 +381,7 @@ VALUE c_cwdict_close(VALUE obj)
   Data_Get_Struct(obj, cwdict_t, d);
 
   if(d->drows && d->count > 0) { *d = cwdict_close(*d); }
-  
+
   return obj;
 }
 
@@ -595,8 +639,8 @@ VALUE c_cwdict_clean_s(VALUE obj)
 
 VALUE c_cwdict_validate_s(VALUE obj)
 {
-  char* e;
   cwdict_t* d;
+  cwerror_t e;
 
   // get original pointer from Ruby VM
   Data_Get_Struct(obj, cwdict_t, d);
@@ -604,8 +648,15 @@ VALUE c_cwdict_validate_s(VALUE obj)
   // handle invalid state first (for error handling's sake)
   if(!cwdict_valid(*d, &e))
   {
-    rb_raise(rb_eException, "%s", e);
-    free(e);
+    char* message = cwerror_string(*d, e);
+    if(e == CWERROR_DICT_TOO_SMALL)
+    rb_raise(e_dict_too_small, "%s", message);
+    else if(e == CWERROR_DICT_UNSORTABLE)
+    rb_raise(e_dict_unsortable, "%s", message);
+    else
+    rb_raise(e_dict_unknown, "%s", message);
+
+    free(message);
   }
 
   return obj;
@@ -624,8 +675,8 @@ VALUE c_cwdict_named_q(VALUE obj)
 
 VALUE c_cwdict_valid_q(VALUE obj)
 {
-  char* e;
   cwdict_t* d;
+  cwerror_t e;
 
   // get original pointer from Ruby VM
   Data_Get_Struct(obj, cwdict_t, d);
@@ -633,8 +684,15 @@ VALUE c_cwdict_valid_q(VALUE obj)
   // handle invalid state first (for error handling's sake)
   if(!cwdict_valid(*d, &e))
   {
-    rb_raise(rb_eException, "%s", e);
-    free(e);
+    char* message = cwerror_string(*d, e);
+    if(e == CWERROR_DICT_TOO_SMALL)
+    rb_raise(e_dict_too_small, "%s", message);
+    else if(e == CWERROR_DICT_UNSORTABLE)
+    rb_raise(e_dict_unsortable, "%s", message);
+    else
+    rb_raise(e_dict_unknown, "%s", message);
+
+    free(message);
 
     return Qfalse;
   }
@@ -679,7 +737,7 @@ VALUE c_cwdict_inspect(VALUE obj)
 {
   cwdict_t* dict; VALUE str;
   size_t count = 0; int multiplier = 1; int word_len = 0;
-  char* result = (char*)malloc(LARGE_BUFFER * multiplier + 1);
+  char* result = (char*)malloc(CW_LARGE_BUFFER * multiplier + 1);
 
   // get original pointer from Ruby VM
   Data_Get_Struct(obj, cwdict_t, dict);
@@ -706,17 +764,17 @@ VALUE c_cwdict_inspect(VALUE obj)
       if(j < dict->drows[i].count - 1){ strcat(result,", "); count += 2; }
 
       // resize result if necessary
-      if(count >= LARGE_BUFFER * multiplier - 100)
+      if(count >= CW_LARGE_BUFFER * multiplier - 100)
       {
         // create temporary copy
-        char* temp = (char*)malloc(LARGE_BUFFER * multiplier + 1);
+        char* temp = (char*)malloc(CW_LARGE_BUFFER * multiplier + 1);
 
         result[count] = '\0';
         strcpy(temp, result);
         temp[count] = '\0';
 
         // increase buffer size
-        result = (char*)realloc(result,LARGE_BUFFER * ++multiplier + 1);
+        result = (char*)realloc(result,CW_LARGE_BUFFER * ++multiplier + 1);
 
         // move back into resulting string and clear intermediary buffer
         strcpy(result, temp);
@@ -840,6 +898,16 @@ void Init_chinwag()
   m_chinwag = rb_define_module("Chinwag");
   c_cwdict = rb_define_class_under(m_chinwag, "CWDict", rb_cObject);
 
+  // setup exception subclasses for error handling
+  e_invalid_output_type =
+  rb_define_class("CWErrorInvalidOutputType", rb_eException);
+  e_min_less_than_one = rb_define_class("CWErrorMinLessThanOne", rb_eException);
+  e_max_less_than_min = rb_define_class("CWErrorMaxLessThanMin", rb_eException);
+  e_max_too_high = rb_define_class("CWErrorMaxTooHigh", rb_eException);
+  e_dict_too_small = rb_define_class("CWErrorDictTooSmall", rb_eException);
+  e_dict_unsortable = rb_define_class("CWErrorDictUnsortable", rb_eException);
+  e_dict_unknown = rb_define_class("CWErrorDictUnknown", rb_eException);
+
   // note module inclusions
   rb_include_module(c_cwdict, rb_mEnumerable);
 
@@ -849,7 +917,7 @@ void Init_chinwag()
   rb_define_module_function(m_chinwag, "set_default_type", m_set_d_type, 1);
   rb_define_module_function(m_chinwag, "set_default_min_output",m_s_min,1);
   rb_define_module_function(m_chinwag, "set_default_max_output",m_s_max,1);
-  
+
   // sync up class methods
   rb_define_singleton_method(c_cwdict, "open", c_cwdict_open, -1);
   rb_define_method(c_cwdict, "close", c_cwdict_close, 0);
@@ -905,8 +973,8 @@ void Init_chinwag()
   default_output_type = ID2SYM(rb_intern("words"));
 
   // set default minimum output amount
-  default_min_output = LONG2NUM(DEFAULT_MIN_OUTPUT_LENGTH);
+  default_min_output = LONG2NUM(CW_DEFAULT_MIN_OUTPUT);
 
   // set default maximum output amount
-  default_max_output = LONG2NUM(DEFAULT_MAX_OUTPUT_LENGTH);
+  default_max_output = LONG2NUM(CW_DEFAULT_MAX_OUTPUT);
 }

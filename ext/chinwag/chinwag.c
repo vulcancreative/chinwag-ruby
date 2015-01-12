@@ -1,47 +1,55 @@
 #include "chinwag.h"
 
 char* chinwag
-(cw_t type, unsigned long min, unsigned long max, cwdict_t dict)
+(cw_t type, unsigned long min, unsigned long max, cwdict_t dict, cwerror_t* e)
 {
-  char* result = NULL;
-
   if(min == 0 || max == 0)
   {
-    char e[]="ERROR : chinwag requires max and min to be greater than 0; "
-    "got min : %d, max : %d\n";
-    fprintf(stderr, e, min, max);
-    exit(EXIT_FAILURE);
+    if(e) *e = CWERROR_MIN_LESS_THAN_ONE;
+    return NULL;
   }
 
   if(max < min)
   {
-    char e[]="ERROR : chinwag requires max greater than, or equal to, min; "
-    "got min : %d, max : %d\n";
-    fprintf(stderr, e, min, max);
-    exit(EXIT_FAILURE);
+    if(e) *e = CWERROR_MAX_LESS_THAN_MIN;
+    return NULL;
   }
 
   if(type >= 4)
   {
-    char e[]="ERROR : chinwag requires a valid output type\n";
-    fprintf(stderr, e, min, max);
-    exit(EXIT_FAILURE);
+    if(e) *e = CWERROR_INVALID_OUTPUT_TYPE;
+    return NULL;
   }
 
-  if(type == CW_LETTERS) result = cw_ltr_rng(min, max, dict);
-  else if(type == CW_WORDS) result = cw_wrd_rng(min, max, dict);
-  else if(type == CW_SENTENCES) result = cw_snt_rng(min, max, dict);
-  else if(type == CW_PARAGRAPHS) result = cw_pgf_rng(min, max, dict);
+  char* result = NULL;
+
+  if(type == CW_LETTERS) result = cw_ltr_rng(min, max, dict, NULL);
+  else if(type == CW_WORDS) result = cw_wrd_rng(min, max, dict, NULL);
+  else if(type == CW_SENTENCES) result = cw_snt_rng(min, max, dict, NULL);
+  else if(type == CW_PARAGRAPHS) result = cw_pgf_rng(min, max, dict, NULL);
 
   return result;
 }
 
 char* cw_ltr_rng
-(unsigned long min, unsigned long max, cwdict_t dict)
+(unsigned long min, unsigned long max, cwdict_t dict, cwerror_t* e)
 {
+  if(min == 0 || max == 0)
+  {
+    if(e) *e = CWERROR_MIN_LESS_THAN_ONE;
+    return NULL;
+  }
+
+  if(max < min)
+  {
+    if(e) *e = CWERROR_MAX_LESS_THAN_MIN;
+    return NULL;
+  }
+
+
   cwdict_t temp = cwdict_open();
   I32 amount = motherr(min,max), total = 0; U32 len = 0;
-  char* s = (char*)malloc(SMALL_BUFFER); char* sample = NULL; 
+  char* s = (char*)malloc(CW_SMALL_BUFFER); char* sample = NULL;
   char* result = NULL; char* vowels = "aeiou";
 
   while(amount > 0)
@@ -108,8 +116,20 @@ char* cw_ltr_rng
 }
 
 char* cw_wrd_rng
-(unsigned long min, unsigned long max, cwdict_t dict)
+(unsigned long min, unsigned long max, cwdict_t dict, cwerror_t* e)
 {
+  if(min == 0 || max == 0)
+  {
+    if(e) *e = CWERROR_MIN_LESS_THAN_ONE;
+    return NULL;
+  }
+
+  if(max < min)
+  {
+    if(e) *e = CWERROR_MAX_LESS_THAN_MIN;
+    return NULL;
+  }
+
   cwdict_t temp = cwdict_open();
   U32 amount = motherr(min, max), total = cwdict_length(dict);
   char* sample = NULL; char* result = NULL;
@@ -129,7 +149,7 @@ char* cw_wrd_rng
         else if(cwdict_exclude(temp, sample)) invalid = false;
       }
     }
-    
+
     temp = cwdict_place_word(temp, sample);
     invalid = true;
   }
@@ -144,20 +164,31 @@ char* cw_wrd_rng
 }
 
 char* cw_snt_rng
-(unsigned long min, unsigned long max, cwdict_t dict)
+(unsigned long min, unsigned long max, cwdict_t dict, cwerror_t* e)
 {
+  if(min == 0 || max == 0)
+  {
+    if(e) *e = CWERROR_MIN_LESS_THAN_ONE;
+    return NULL;
+  }
+
+  if(max < min)
+  {
+    if(e) *e = CWERROR_MAX_LESS_THAN_MIN;
+    return NULL;
+  }
+
   cwdict_t master = cwdict_open(), temp; cwdrow_t selected;
-  U32 word_amount = 0, last = 0, amount = motherr(min, max), now = 0, 
+  U32 word_amount = 0, last = 0, amount = motherr(min, max), now = 0,
   len = 0, t_minus = 0; U8 comma = 0; I32 punct = 0;
-  U32* no_dice = (U32*)malloc(sizeof(U32) * SMALL_BUFFER);
+  U32* no_dice = (U32*)malloc(sizeof(U32) * CW_SMALL_BUFFER);
   char* sample = NULL; char* result = NULL; char* s = NULL;
   bool invalid = true;
 
   for(U32 i = 0; i != amount; ++i)
   {
     temp = cwdict_open();
-    word_amount = motherr(SENTENCE_MIN_WORD_LENGTH, 
-    SENTENCE_MAX_WORD_LENGTH);
+    word_amount = motherr(CW_SENTENCE_MIN_WORD, CW_SENTENCE_MAX_WORD);
 
     if(word_amount >= 2) comma = (U8)motherr(0, 1);
 
@@ -227,18 +258,30 @@ char* cw_snt_rng
 }
 
 char* cw_pgf_rng
-(unsigned long min, unsigned long max, cwdict_t dict)
+(unsigned long min, unsigned long max, cwdict_t dict, cwerror_t* e)
 {
+  if(min == 0 || max == 0)
+  {
+    if(e) *e = CWERROR_MIN_LESS_THAN_ONE;
+    return NULL;
+  }
+
+  if(max < min)
+  {
+    if(e) *e = CWERROR_MAX_LESS_THAN_MIN;
+    return NULL;
+  }
+
   char* result = NULL; char* sentences = NULL;
   U32 amount = motherr(min, max), sentence_amount = 0;
   cwdict_t master = cwdict_open();
 
   for(U32 i = 0; i != amount; ++i)
   {
-    sentence_amount = motherr(PARAGRAPH_MIN_SENTENCE_LENGTH, 
-    PARAGRAPH_MAX_SENTENCE_LENGTH);
+    sentence_amount = motherr(CW_PARAGRAPH_MIN_SENTENCE,
+    CW_PARAGRAPH_MAX_SENTENCE);
 
-    sentences = cw_snt(sentence_amount, dict);
+    sentences = cw_snt(sentence_amount, dict, NULL);
     master = cwdict_place_word(master, sentences);
 
     free(sentences);
