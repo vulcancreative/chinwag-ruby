@@ -2,7 +2,7 @@
 
 U32 help(void)
 {
-  char *buffer; char text[] = 
+  char *buffer; char text[] =
   "Usage: ./lorem [options]\n"
   "  Options:\n"
   "  -d, [--dict]       # Optional dictionary [embedded: seuss|latin, default: seuss]\n"
@@ -39,10 +39,10 @@ U32 help(void)
 U32 version(void)
 {
   char *buffer;
-  char text[] = "Babble::Lorem, %d.%d.%d (%s-%s-%s revision %s)\n";
+  char text[] = "Babble::Lorem, %s (%s-%s-%s revision %s)\n";
 
   buffer = (char*)malloc(CW_SMALL_BUFFER);
-  sprintf(buffer, text, CW_VERSION, CW_DATE_YEAR, CW_DATE_MONTH, 
+  sprintf(buffer, text, CW_VERSION, CW_DATE_YEAR, CW_DATE_MONTH,
   CW_DATE_DAY, CW_REVISION);
   fprintf(stdout, "%s", buffer);
 

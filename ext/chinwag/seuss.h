@@ -1,5 +1,5 @@
-#ifndef __SEUSS_VJW8FT33_H
-#define __SEUSS_VJW8FT33_H
+#ifndef __SEUSS_VQ2GXM2K_H
+#define __SEUSS_VQ2GXM2K_H
 
 #include "chinwag.h"
 
