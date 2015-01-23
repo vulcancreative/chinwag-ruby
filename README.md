@@ -17,7 +17,7 @@ The library universally features:
 
 
 	EXAMPLE IN
-	gem install chinwag
+	gem install chinwag -v '~> 1.2'
 
 ## Versioning
 
