@@ -39,6 +39,7 @@ To generate output, you need to open a dictionary object. The dictionary can be 
 
 Typically the easiest way to [generate output](Generation) is to simply use one of the library's embedded dictionaries -- either `Seussian` or `Latin`.
 
+These are installed programmatically, and have their own specific method for access. This is advantageous when utilizing multiple dicitonaries and caching to a global is not an option, as IO bottlenecking isn't a factor.
 
 	EXAMPLE IN
 	require 'chinwag'
