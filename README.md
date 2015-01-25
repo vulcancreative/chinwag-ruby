@@ -18,7 +18,6 @@ The library universally features:
 ## Installation
 
 
-	EXAMPLE IN
 	gem install chinwag -v '~> 1.2'
 
 ## Versioning
@@ -122,7 +121,7 @@ Occasionally, one needs to make modifications directly to a dictionary instance.
 
 	EXAMPLE IN
 	require 'chinwag'
-	blank = Chinwag::Chinwag.close seuss
+	blank = seuss.close
 	# Clears all of seuss' internal, dynamic memory,
 	# and resets it to a blank dictionary, which
 	# you are free to capture
