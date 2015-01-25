@@ -105,8 +105,15 @@ Nevertheless, we allow deep copies, via the library. Duplication will respect an
 
 ### In-Place Modification
 
+Occasionally, one needs to make modifications directly to a dictionary instance. We allow for modifiying the instance's internal entries directly via Ruby iteration paradigms. This is particularly useful for, say, converting all entries to uppercase.
 
-
+	EXAMPLE IN
+	require 'chinwag'
+	caps = Chinwag::CWDict.open "Caps"
+	caps << %w[these words will be capitalized]
+	caps.map! { |e| e.upcase! }
+	
+	EXAMPLE OUT
 
 ### Closing a Dictionary
 
