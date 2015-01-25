@@ -52,8 +52,27 @@ These are installed programmatically, and have their own specific method for acc
 
 Opening a custom dictionary is very similar to opening an embedded dictionary. Typically the only drawback, however, is that it is a little slower, given that there is often some I/O overhead. Custom dictionaries do need to be [checked for errors](Errors) and [sorted](SortingAndPruning), as well, prior to [generation](Generation).
 
+If you need a valid, custom dictionary to test against, we recommend our [Noise dictionary](http://vulcanca.com/babble/docs/noise.dict). It has several thousand entries, and will have no problem passing any and all internal validation procedures.
 
+	EXAMPLE IN
+	require 'chinwag'
+	tokens = File.open("noise.dict", 'r')
+	noise = Chinwag::CWDict.open tokens
+	# Chinwag will deduce the dictionary name
+	# from the file basename, in this case, "noise"
 
+	EXAMPLE OUT
+	noise: {
+		name: "noise",
+		length: 18957,
+		named?: true,
+		valid?: true,
+		sorted? true,
+		_: [
+			[g, s, u, z, l, h, i, a, m, v, o, q, ...
+			pzhvbzvnsdozcuxpgldrwylvedosnbbktoyi]
+		]
+	}
 
 ### Opening a Blank Dictionary
 
@@ -64,6 +83,14 @@ While having a blank dictionary is not particularly useful, you can append to it
 	blank = Chinwag::Chinwag.open
 
 	EXAMPLE OUT
+	blank: {
+		name: "",
+		length: 0,
+		named?: false,
+		valid?: false,
+		sorted? false,
+		_: []
+	}
 
 ### Examining Dictionaries
 
