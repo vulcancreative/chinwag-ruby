@@ -43,10 +43,33 @@ These are installed programmatically, and have their own specific method for acc
 
 	EXAMPLE IN
 	require 'chinwag'
-	seuss = Chinwag::CWDict.open "Seussian"
-	latin = Chinwag::CWDict.open "Latin"
+	seuss = Chinwag::CWDict.open "seussian"
+	latin = Chinwag::CWDict.open "latin"
 
 	EXAMPLE OUT
+	seuss: {
+		name: "seussian",
+		length: 1096,
+		named?: true,
+		valid?: true,
+		sorted? true,
+		_: [
+			[I, a], [TV, am, an, as, at, be, ...
+			[Mordecai Ali Van Allen O'Shea]
+		]
+	}
+	
+	latin: {
+		name: "Latin",
+		length: 35664,
+		named?: true,
+		valid?: true,
+		sorted?: true,
+		_: [
+			[a, b, c, d, e, f, k, l, m, n, o, ...
+			semicircumferentia, supersubstantialis, supertriparticular]
+		]
+	}
 
 ### Opening a Custom Dictionary
 
@@ -98,21 +121,46 @@ If there is ever a reason you need to visually debug a dictionary, each of our l
 
 	EXAMPLE IN
 	require 'chinwag'
-	seuss = Chinwag::CWDict.open "Seussian"
+	seuss = Chinwag::CWDict.open "seussian"
 	puts seuss
 
 	EXAMPLE OUT
+	[[I, a], [TV, am, an, as, at, be, ...
+	[Dibble Dibble Dibble Dribble], [Mordecai Ali Van Allen O'Shea]]
 
 ### Dictionary Arithmetic
 
+Whether using an embedded dictionary, or something custom, you can concatenate new entries in the form of strings. This is particularly useful if you have a blank dictionary, and gradually want to build upon it by adding in information dynamically.
 
 	EXAMPLE IN
 	require 'chinwag'
-	blank = Chinwag::Chinwag.open
-	blank += "test"
-	blank << %w[quick test]
+	ungrouped = Chinwag::CWDict.open
+	grouped = Chinwag::CWDict.open
+	ungrouped += %[these are some test words]
+	grouped << %w[these words will be sorted]
 
 	EXAMPLE OUT
+	ungrouped: {
+		name: "",
+		length: 5,
+		named?: false,
+		valid?: false,
+		sorted?: false,
+		_: [
+			[these, are, some, test, words]
+		]
+	}
+	
+	grouped: {
+		name: "",
+		length: 5,
+		named?: false,
+		valid?: false,
+		sorted?: false,
+		_: [
+			[these, words], [will], [be], [sorted]
+		]
+	}
 
 ### Sorting and Pruning
 
@@ -127,7 +175,7 @@ Nevertheless, we allow deep copies, via the library. Duplication will respect an
 
 	EXAMPLE IN
 	require 'chinwag'
-	seuss = Chinwag::CWDict.open "Seussian"
+	seuss = Chinwag::CWDict.open "seussian"
 	copy = seuss.clone
 
 	EXAMPLE OUT
@@ -180,7 +228,7 @@ Occasionally, one needs to make modifications directly to a dictionary instance.
 
 	EXAMPLE IN
 	require 'chinwag'
-	seuss = Chinwag::CWDict.open "Seussian"
+	seuss = Chinwag::CWDict.open "seussian"
 	output = Chinwag::generate(:words, 10, 20, seuss)
 	# Generates ten to twenty words in Seussian
 
