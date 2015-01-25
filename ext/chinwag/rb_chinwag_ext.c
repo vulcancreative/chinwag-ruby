@@ -329,14 +329,15 @@ VALUE c_cwdict_open(int argc, VALUE* argv, VALUE obj)
   if(!tkns_ptr && !name_ptr && !used_file) d = cwdict_open();
   else if(tkns_ptr && !used_file)
   {
-    if(strcmp(tkns_ptr, "seussian") == 0)
+    if(strcmp(tkns_ptr, "seussian") == 0 || strcmp(tkns_ptr, "Seussian") == 0 ||
+    strcmp(tkns_ptr, "seuss") == 0 || strcmp(tkns_ptr, "Seuss") == 0)
     {
       if(!name_ptr)
       d=cwdict_open_with_name_and_tokens("seussian",dict_seuss,CW_DELIMITERS);
       else
       d=cwdict_open_with_name_and_tokens(name_ptr,dict_seuss,CW_DELIMITERS);
     }
-    else if(strcmp(tkns_ptr, "latin") == 0)
+    else if(strcmp(tkns_ptr, "latin") == 0 || strcmp(tkns_ptr, "Latin") == 0)
     {
       if(!name_ptr)
       d=cwdict_open_with_name_and_tokens("latin", dict_latin,CW_DELIMITERS);
