@@ -116,7 +116,7 @@ While having a blank dictionary is not particularly useful, you can append to it
 ```ruby
 # EXAMPLE IN
 require 'chinwag'
-blank = Chinwag::Chinwag.open
+blank = Chinwag::CWDict.open
 ```
 
 ```
