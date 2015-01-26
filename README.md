@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/vulcancreative/chinwag-ruby.svg?branch=master)](https://travis-ci.org/vulcancreative/chinwag-ruby)
+# Chinwag [![Build Status](https://travis-ci.org/vulcancreative/chinwag-ruby.svg?branch=master)](https://travis-ci.org/vulcancreative/chinwag-ruby)
 
 ## Introduction
 
@@ -247,7 +247,7 @@ cleaned: {
 
 ### Duplication
 
-As dictionaries are rooted as complex structs in C99, and require a variety of resources to initalize and close, duplication is a slightly complex procedure.
+As dictionaries are rooted as complex structs in C99, and require a variety of resources to initialize and close, duplication is a slightly complex procedure.
 
 Nevertheless, we allow deep copies, via the library. Duplication will respect any sorting or pruning that has been done previously to the dictionary being copied, and will have a new address in memory.
 
