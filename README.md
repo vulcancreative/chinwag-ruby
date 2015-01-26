@@ -28,7 +28,9 @@ When we make releases to the API, we strive for consistency across all of the va
 # EXAMPLE IN
 require 'chinwag'
 puts Chinwag.version
+```
 
+```
 # EXAMPLE OUT
 1.2.3
 ```
@@ -48,7 +50,9 @@ These are installed programmatically, and have their own specific method for acc
 require 'chinwag'
 seuss = Chinwag::CWDict.open "seussian"
 latin = Chinwag::CWDict.open "latin"
+```
 
+```
 # EXAMPLE OUT
 seuss: {
 	name: "seussian",
@@ -88,7 +92,9 @@ tokens = File.open("noise.dict", 'r')
 noise = Chinwag::CWDict.open tokens
 # Chinwag will deduce the dictionary name
 # from the file basename, in this case, "noise"
+```
 
+```
 # EXAMPLE OUT
 noise: {
 	name: "noise",
@@ -111,7 +117,9 @@ While having a blank dictionary is not particularly useful, you can append to it
 # EXAMPLE IN
 require 'chinwag'
 blank = Chinwag::Chinwag.open
+```
 
+```
 # EXAMPLE OUT
 blank: {
 	name: "",
@@ -132,7 +140,9 @@ If there is ever a reason you need to visually debug a dictionary, each of our l
 require 'chinwag'
 seuss = Chinwag::CWDict.open "seussian"
 puts seuss
+```
 
+```
 # EXAMPLE OUT
 [[I, a], [TV, am, an, as, at, be, ...
 [Dibble Dibble Dibble Dribble], [Mordecai Ali Van Allen O'Shea]]
@@ -149,7 +159,9 @@ ungrouped = Chinwag::CWDict.open
 grouped = Chinwag::CWDict.open
 ungrouped += %[these are some test words]
 grouped << %w[these words will be sorted]
+```
 
+```
 # EXAMPLE OUT
 ungrouped: {
 	name: "",
@@ -190,7 +202,9 @@ Nevertheless, we allow deep copies, via the library. Duplication will respect an
 require 'chinwag'
 seuss = Chinwag::CWDict.open "seussian"
 copy = seuss.clone
+```
 
+```
 # EXAMPLE OUT
 ```
 
@@ -204,7 +218,9 @@ require 'chinwag'
 caps = Chinwag::CWDict.open "Caps"
 caps << %w[these words will be capitalized]
 caps.map! { |e| e.upcase! }
+```
 
+```
 # EXAMPLE OUT
 ```
 
@@ -218,7 +234,9 @@ blank = seuss.close
 # Clears all of seuss' internal, dynamic memory,
 # and resets it to a blank dictionary, which
 # you are free to capture
+```
 
+```
 # EXAMPLE OUT
 ```
 
@@ -241,7 +259,9 @@ rescue Chinwag::CWErrorDictUnsortable => e
 	# The dictionary couldn't sort entries by length
 rescue => e
 	# You received another error, unrelated to the library
+```
 
+```
 # EXAMPLE OUT
 CWDictTooSmall: too few acceptable entries (0 of 300)
 ```
@@ -255,7 +275,9 @@ require 'chinwag'
 seuss = Chinwag::CWDict.open "seussian"
 output = Chinwag::generate(:words, 10, 20, seuss)
 # Generates ten to twenty words in Seussian
+```
 
+```
 # EXAMPLE OUT
 ```
 
