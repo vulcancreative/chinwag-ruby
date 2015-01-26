@@ -188,8 +188,62 @@ grouped: {
 
 ### Sorting and Pruning
 
+While generation requires a dictionary to be sorted by length, it is also best-practice to prune your dictionary of repeat elements. Cleaning both sorts and prunes.
 
+```ruby
+require 'chinwag'
+sorted = Chinwag::CWDict.open "Sorted"
+pruned = Chinwag::CWDict.open "Pruned"
+cleaned = Chinwag::CWDict.open "Cleaned"
+sorted += %w[this is a quick test]
+pruned += %w[something something another done]
+cleaned += %w[first second first second third]
+sorted.sort!
+# orders by entry length,
+# meeting generation requirements
+pruned.prune!
+# removes duplicates, retains placement
+# needs to be sorted before generating
+cleaned.clean!
+# removes duplicates and sorts,
+# meeting generation requirements
+```
 
+```
+// EXAMPLE OUT
+sorted: {
+	name: "Sorted",
+	length: 5,
+	named?: true,
+	valid?: false,
+	sorted?: true,
+	_ : [
+		[a], [is], [test, this], [quick]
+	]
+}
+
+pruned: {
+	name: "Pruned",
+	length: 3,
+	named?: true,
+	valid?: false,
+	sorted?: true,
+	_ : [
+		[something], [another], [done]
+	]
+}
+
+cleaned: {
+	name: "Cleaned",
+	length: 3,
+	named?: true,
+	valid?: false,
+	sorted?: true,
+	_: [
+		[first, third], [second]
+	]
+}
+```
 
 ### Duplication
 
@@ -210,7 +264,7 @@ copy = seuss.clone
 
 ### In-Place Modification
 
-Occasionally, one needs to make modifications directly to a dictionary instance. We allow for modifiying the instance's internal entries directly via Ruby iteration paradigms. This is particularly useful for, say, converting all entries to uppercase.
+Occasionally, one needs to make modifications directly to a dictionary instance. We allow for modifying the instance's internal entries directly via Ruby iteration paradigms. This is particularly useful for, say, converting all entries to uppercase.
 
 ```ruby
 # EXAMPLE IN
