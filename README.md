@@ -1,4 +1,4 @@
-# Chinwag [![Build Status](https://travis-ci.org/vulcancreative/chinwag-ruby.svg?branch=master)](https://travis-ci.org/vulcancreative/chinwag-ruby)
+[![Build Status](https://travis-ci.org/vulcancreative/chinwag-ruby.svg?branch=master)](https://travis-ci.org/vulcancreative/chinwag-ruby)
 
 ## Introduction
 
