@@ -283,5 +283,5 @@ output = Chinwag::generate(:words, 10, 20, seuss)
 
 ## Legal
 
-Chinwag is available under the [MIT License](http://opensource.org/licenses/MIT).
+Chinwag is available under the [MIT License](http://opensource.org/licenses/MIT).<br>
 Use, abuse, and please don't bite the hand that feeds you.
