@@ -227,7 +227,7 @@ pruned: {
 	length: 3,
 	named?: true,
 	valid?: false,
-	sorted?: true,
+	sorted?: false,
 	_ : [
 		[something], [another], [done]
 	]
