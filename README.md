@@ -2,6 +2,7 @@
 
 ## Introduction
 
+
 Chinwag, other than being a funny word, is an open-source, developer toolset used for text-synthesis. The goal is to allow for developers and designers (with a little programming experience) to be able to rapidly prototype text-heavy interfaces, but in a fun manner.
 
 It is primarily written in C99 (for the sake of speed and portability), but has many official language bindings, covering C, Ruby, Python, Swift, and Go.
@@ -17,14 +18,18 @@ The library universally features:
 
 ## Installation
 
-	gem install chinwag -v '~> 1.2'
 
-	# or, add this to your Gemfile
-	gem 'chinwag', '~> 1.2.0'
+```shell
+gem install chinwag -v '~> 1.2'
+
+# or, if you're using Bundler
+gem 'chinwag', :git => 'https://github.com/vulcancreative/chinwag-ruby'
+```
 
 ## Versioning
 
-When we make releases to the API, we strive for consistency across all of the various, language-flavors. Meaning -- when we release an update to the core Chinwag API (in C99), we update all sister components. This should guarantee a consistent version release number across all equivalent libraries.
+
+When we make releases to the API, we strive for consistency across all of the various, language-flavors. Meaning &ndash; when we release an update to the core Chinwag API (in C99), we update all sister components. This should guarantee a consistent version release number across all equivalent libraries.
 
 
 ```ruby
@@ -33,18 +38,19 @@ require 'chinwag'
 puts Chinwag.version
 ```
 
-```
+```sample
 # EXAMPLE OUT
 1.2.3
 ```
 
 ## Dictionaries
 
-To generate output, you need to open a dictionary object. The dictionary can be blank, pulled from a custom token file, or loaded from one of Chinwag's embedded options -- `Seussian` or `Latin`.
+
+To generate output, you need to open a dictionary object. The dictionary can be blank, pulled from a custom token file, or loaded from one of Chinwag's embedded options &ndash; `Seussian` or `Latin`.
 
 ### Opening an Embedded Dictionary
 
-Typically the easiest way to [generate output](#generation) is to simply use one of the library's embedded dictionaries -- either `Seussian` or `Latin`.
+Typically the easiest way to [generate output](#generation) is to simply use one of the library's embedded dictionaries &ndash; either `Seussian` or `Latin`.
 
 These are installed programmatically, and have their own specific method for access. This is advantageous when utilizing multiple dicitonaries and caching to a global is not an option, as IO bottlenecking isn't a factor.
 
@@ -55,7 +61,7 @@ seuss = Chinwag::CWDict.open "seussian"
 latin = Chinwag::CWDict.open "latin"
 ```
 
-```
+```sample
 # EXAMPLE OUT
 seuss: {
 	name: "seussian",
@@ -97,7 +103,7 @@ noise = Chinwag::CWDict.open tokens
 # from the file basename, in this case, "noise"
 ```
 
-```
+```sample
 # EXAMPLE OUT
 noise: {
 	name: "noise",
@@ -122,7 +128,7 @@ require 'chinwag'
 blank = Chinwag::CWDict.open
 ```
 
-```
+```sample
 # EXAMPLE OUT
 blank: {
 	name: "",
@@ -145,7 +151,7 @@ seuss = Chinwag::CWDict.open "seussian"
 puts seuss
 ```
 
-```
+```sample
 # EXAMPLE OUT
 [[I, a], [TV, am, an, as, at, be, ...
 [Dibble Dibble Dibble Dribble], [Mordecai Ali Van Allen O'Shea]]
@@ -164,7 +170,7 @@ ungrouped += %[these are some test words]
 grouped << %w[these words will be sorted]
 ```
 
-```
+```sample
 # EXAMPLE OUT
 ungrouped: {
 	name: "",
@@ -212,7 +218,7 @@ cleaned.clean!
 # meeting generation requirements
 ```
 
-```
+```sample
 // EXAMPLE OUT
 sorted: {
 	name: "Sorted",
@@ -262,7 +268,7 @@ copy = seuss.clone
 seuss.close
 ```
 
-```
+```sample
 # EXAMPLE OUT
 seuss: {
 	name: "",
@@ -298,7 +304,7 @@ caps << %w[these words will be capitalized]
 caps.map! { |e| e.upcase! }
 ```
 
-```
+```sample
 # EXAMPLE OUT
 caps: {
 	name: "Caps",
@@ -327,7 +333,7 @@ blank = seuss.close
 # you are free to capture
 ```
 
-```
+```sample
 # EXAMPLE OUT
 seuss: {
 	name: "",
@@ -359,6 +365,7 @@ blank: {
 
 ## Validation and Errors
 
+
 Upon loading a foreign dictionary, it is crucial to test its validity, prior to use. This checks that the library will be capable of understanding the dictionary format properly, and, if so, ensures adequate randomization for our synthesis algorithms.
 
 Embedded dictionaries have already been thoroughly tested, and need no further validation. This, in turn, grants the embedded resources an additional speed boost.
@@ -378,12 +385,13 @@ rescue => e
 	# You received another error, unrelated to the library
 ```
 
-```
+```sample
 # EXAMPLE OUT
 CWDictTooSmall: too few acceptable entries (0 of 300)
 ```
 
 ## Generation
+
 
 
 ```ruby
@@ -402,7 +410,7 @@ p output
 # Prints thirty letters using defaults
 ```
 
-```
+```sample
 // EXAMPLE OUT
 A With Monkeys Everywhere I Comes Stew Mostly Lasso Shout
 Confused Congratulations When Blackbottomed
@@ -411,6 +419,7 @@ Wonderfully Her Amounts Feetae
 ```
 
 ## Legal
+
 
 Chinwag is available under the [MIT License](http://opensource.org/licenses/MIT).<br>
 Use, abuse, and please don't bite the hand that feeds you.
