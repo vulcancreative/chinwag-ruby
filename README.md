@@ -256,10 +256,31 @@ Nevertheless, we allow deep copies, via the library. Duplication will respect an
 require 'chinwag'
 seuss = Chinwag::CWDict.open "seussian"
 copy = seuss.clone
+seuss.close
 ```
 
 ```
 # EXAMPLE OUT
+seuss: {
+	name: "",
+	length: 0,
+	named?: false,
+	valid?: false,
+	sorted?: false,
+	_ : []
+}
+
+copy: {
+	name: "Seussian",
+	length: 1096,
+	named?: true,
+	valid?: true,
+	sorted?: true,
+	_: [
+		[I, a], [TV, am, an, as, at, be, ...
+		[Mordecai Ali Van Allen O'Shea]
+	]
+}
 ```
 
 ### In-Place Modification
@@ -276,6 +297,16 @@ caps.map! { |e| e.upcase! }
 
 ```
 # EXAMPLE OUT
+caps: {
+	name: "Caps",
+	length: 5,
+	named?: true,
+	valid?: false,
+	sorted?: false,
+	_: [
+		[THESE, WORDS], [WILL], [BE], [CAPITALIZED]
+	]
+}
 ```
 
 ### Closing a Dictionary
