@@ -19,6 +19,9 @@ The library universally features:
 
 	gem install chinwag -v '~> 1.2'
 
+	# or, add this to your Gemfile
+	gem 'chinwag', '~> 1.2.0'
+
 ## Versioning
 
 When we make releases to the API, we strive for consistency across all of the various, language-flavors. Meaning -- when we release an update to the core Chinwag API (in C99), we update all sister components. This should guarantee a consistent version release number across all equivalent libraries.
