@@ -387,12 +387,24 @@ CWDictTooSmall: too few acceptable entries (0 of 300)
 # EXAMPLE IN
 require 'chinwag'
 seuss = Chinwag::CWDict.open "seussian"
-output = Chinwag::generate(:words, 10, 20, seuss)
-# Generates ten to twenty words in Seussian
+output = Chinwag::generate(seuss, :words, 10, 20)
+p output
+# Prints ten to twenty words in Seussian
+Chinwag::set_default_type :letters
+Chinwag::set_default_max_output 30
+# Max must be set first if higher than min
+Chinwag::set_default_min_output 30
+output = Chinwag::generate
+p output
+# Prints thirty letters using defaults
 ```
 
 ```
-# EXAMPLE OUT
+// EXAMPLE OUT
+A With Monkeys Everywhere I Comes Stew Mostly Lasso Shout
+Confused Congratulations When Blackbottomed
+
+Wonderfully Her Amounts Feetae
 ```
 
 ## Legal
