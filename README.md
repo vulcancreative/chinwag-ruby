@@ -315,6 +315,9 @@ caps: {
 ```ruby
 # EXAMPLE IN
 require 'chinwag'
+seuss = Chinwag::CWDict.open "seussian"
+latin = Chinwag::CWDict open "latin"
+latin.close
 blank = seuss.close
 # Clears all of seuss' internal, dynamic memory,
 # and resets it to a blank dictionary, which
@@ -323,6 +326,32 @@ blank = seuss.close
 
 ```
 # EXAMPLE OUT
+seuss: {
+	name: "",
+	length: 0,
+	named?: false,
+	valid?: false,
+	sorted?: false,
+	_: []
+}
+
+latin: {
+	name: "",
+	length: 0,
+	named?: false,
+	valid?: false,
+	sorted?: false,
+	_: []
+}
+
+blank: {
+	name: "",
+	length: 0,
+	named?: false,
+	valid?: false,
+	sorted?: false,
+	_: []
+}
 ```
 
 ## Validation and Errors
