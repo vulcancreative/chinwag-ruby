@@ -103,11 +103,11 @@ noise = nil
 begin
 	tokens = File.open("noise.dict", 'r')
 	noise = Chinwag::CWDict.open tokens
+	# Chinwag will deduce the dictionary name
+	# from the file basename, in this case, "noise"
 rescue
 	# handle IO Error
 end
-# Chinwag will deduce the dictionary name
-# from the file basename, in this case, "noise"
 ```
 
 ```sample
