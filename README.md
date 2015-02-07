@@ -121,7 +121,7 @@ noise: {
 ```
 
 
-> Note : loading a custom dictionary does invoke quite a bit of IO overhead. It is best practice to load a dictionary and cache it for the entirety of its use cycle, in a global variable or otherwise.
+> Note : loading a custom dictionary does invoke quite a bit of IO overhead. It is best practice to load a dictionary and cache it for the entirety of its use cycle (often in a global variable).
 
 
 ### Opening a Blank Dictionary
