@@ -337,6 +337,7 @@ caps: {
 
 ### Closing a Dictionary
 
+By default, when closing a dictionary, a blank dictionary is returned. This value can be ignored, if desired.
 
 ```ruby
 # EXAMPLE IN

@@ -581,7 +581,7 @@ VALUE c_cwdict_prune(VALUE obj)
   // get original pointer from Ruby VM
   Data_Get_Struct(new, cwdict_t, d);
 
-  *d = cwdict_prune(*d, false);
+  *d = cwdict_prune(*d, false, true);
 
   return new;
 }
@@ -597,7 +597,7 @@ VALUE c_cwdict_clean(VALUE obj)
   // get original pointer from Ruby VM
   Data_Get_Struct(new, cwdict_t, d);
 
-  *d = cwdict_prune(*d, true);
+  *d = cwdict_clean(*d);
 
   return new;
 }
@@ -621,7 +621,7 @@ VALUE c_cwdict_prune_s(VALUE obj)
   // get original pointer from Ruby VM
   Data_Get_Struct(obj, cwdict_t, d);
 
-  *d = cwdict_prune(*d, false);
+  *d = cwdict_prune(*d, false, true);
 
   return obj;
 }
@@ -633,7 +633,7 @@ VALUE c_cwdict_clean_s(VALUE obj)
   // get original pointer from Ruby VM
   Data_Get_Struct(obj, cwdict_t, d);
 
-  *d = cwdict_prune(*d, true);
+  *d = cwdict_clean(*d);
 
   return obj;
 }
