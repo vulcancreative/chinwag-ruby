@@ -411,6 +411,9 @@ CWDictTooSmall: too few acceptable entries (0 of 300)
 ## Generation
 
 
+With a valid dictionary in-hand, generating output is an incredibly easy task. One needs to simply specify the `output type` and `output amount(s)`, passing the dictionary reference as an argument, and the library will handle the rest.
+
+It is possible to allow for generation using only the defaults, and, subsequently, modifying the defaults, to allow for succinct operation.
 
 ```ruby
 # EXAMPLE IN
